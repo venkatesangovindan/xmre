@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XMRE - Deals, Loans, Properties</title>
+    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/d3.min.js"></script>
+    <script src="js/util.js"></script>
+    <link rel="stylesheet" href="css/style.css" type="text/css">
+    <style>
+        #social_graph{
+            width: 95%;
+            height: 450px;
+            margin: 10px 10px 10px 10px;
+            border: 1px solid #7c7c7c
+                
+        }
+        div.tooltip {
+            position: absolute;
+            width: 100px;
+            height: auto;
+            text-align: center;           
+            padding: 5px;             
+            font: 12px sans-serif;        
+            background-color: #D4D4D4;  
+            border: 0px; 
+            pointer-events: none;
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+            -mox-box-shadow: 4px 4px 4px 10px rgba(0, 0, 0, 0.4);
+            box-shadow: 4px 4px 10px rbga(0, 0, 0, 0.4);
+            pointer-events: none;  
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="social_graph"></div>
+    </div>
+
+<script>
+$( document ).ready(function() {
+        
+    /*********************************
+     * Common functions and variables
+     *********************************/
+
+    // Helper functions for collapsing and expanding nodes.
+
+    function collapse(d) {
+        if (d.children) {
+            d._children = d.children;
+            d._children.forEach(collapse);
+            d.children = null;
+        }
+    }
+
+    function expand(d) {
+        if (d._children) {
+            d.children = d._children;
+            d.children.forEach(expand);
+            d._children = null;
+        }
+    }   
+    // Toggle children function
+    function toggleChildren(d) {
+        // always show root node with one level
+        if(!d.parent){
+            return d;            
+        }        
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else if (d._children) {
+            d.children = d._children;
+            d._children = null;
+        }
+        return d;
+    }
+    
+    var duration = 500;
+    var margin = {top: 5, right: 5, bottom: 5, left: 5},
+        width = 1200 - margin.left - margin.right,
+        height = 450 - margin.top - margin.bottom;
+    
+    var zoom = d3.behavior.zoom()
+        .scaleExtent([1, 10])
+        .on("zoom", zoomed);
+
+    var svg = d3.select("#social_graph").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
+        .call(zoom);
+
+var rect = svg.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "none")
+    .style("pointer-events", "all");
+
+    var container = svg.append("g");
+
+    var tooltip = d3.select("body").append("div")   
+        .attr("class", "tooltip")               
+        .style("opacity", 0);
+
+
+    /**********************************************
+     * Deals D3 js
+     **********************************************/                 
+    function deals(){}
+
+    deals.data = {
+        name : "EURO 25X",
+        colorFill: "#67CDDC",
+        currencySymbol: "$",
+        amount: "80.1M",
+        children : [
+            {
+                name : "A",
+                colorFill: "#69A8D2",
+                currencySymbol: "$",
+                amount: "80.1M",
+            },
+            {
+                name : "B",
+                colorFill: "#69A8D2",
+                currencySymbol: "$",
+                amount: "80.1M",            
+            },
+            {
+                name : "C",
+                colorFill: "#69A8D2",
+                currencySymbol: "$",
+                amount: "80.1M",            
+            },
+            {
+                name : "D",
+                colorFill: "#69A8D2",
+                currencySymbol: "$",
+                amount: "80.1M",            
+            },
+            {
+                name : "E",
+                colorFill: "#69A8D2",
+                currencySymbol: "$",
+                amount: "80.1M",            
+                children : [
+                    {name : "H 1", colorFill: "#BADD8C"},
+                    {name : "H 2", colorFill: "#BADD8C"},
+                    {name : "H 3", colorFill: "#BADD8C"} ]
+            }
+    ]};
+             
+    //variables
+    var di = 0;   
+    var droot;
+    var maxDisplayChar = 10;
+
+    // size of the diagram
+    var dviewerWidth = 800;
+    var dviewerHeight = 430;
+    var drootr = 40;
+    var dlevel1r = 30;
+    var dlevel2r = 25;
+
+    var dtree = d3.layout.tree()
+       .size([dviewerHeight, dviewerWidth]);
+
+    // define a d3 diagonal projection for use by the node paths later on.
+    var ddiagonal = d3.svg.diagonal()
+        .projection(function(d) {
+            return [d.y, d.x];
+        });
+        
+    var dealsGroup = container.append("g")
+                               .attr("transform", "translate(950,0)");  
+    // Function to center node when clicked so node doesn't get lost when collapsing/moving with large amount of children.
+    function dealsCenterNode(source) {
+        
+        scale = zoom.scale();        
+        x = -source.y0;
+        y = -source.x0;
+        x = x * scale + 950;
+        y = y * scale + dviewerHeight / 2 - 15;        
+        dealsGroup.transition()
+            .duration(duration)
+            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
+
+        zoom.scale(scale);
+        
+        // adjust the space between loans and properties
+//        propertiesGroup.transition()
+//            .duration(duration)
+//            //.attr("transform", "translate(" + (x - 300)  + "," + 200 + ")scale(" + scale + ")");
+//            .attr("transform", function(d) {
+//                var newxval = 200;
+//                if(x < 650){
+//                    newxval = 650 - x;
+//                    newxval = 200 - newxval;
+//                }
+//                return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
+//            });
+            
+      // adjust the space between deals and loans
+      if(loansGroup){
+        loansGroup.transition()
+             .duration(duration)
+             .attr("transform", function(d) {
+                 var newxval = 650;
+                 if(x < 950){
+                     newxval = 650 - (950 - x);
+
+                 }
+                 return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
+             });          
+      }
+      
+      // adjust the space between properties and loans
+      if(propertiesGroup){
+        propertiesGroup.transition()
+             .duration(duration)
+             .attr("transform", function(d) {
+                 var newxval = 200;
+                 if(x < 950){
+                     newxval = 200 - (950 - x);
+
+                 }
+                 return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
+             });          
+      }      
+
+
+    }
+
+    function dealsClick(d) {
+        
+        if (d3.event.defaultPrevented) return; // click suppressed
+        d = toggleChildren(d);
+        dealsUpdate(d);
+        dealsCenterNode(d);
+    }
+
+    function dealsUpdate(source) {
+        dtree = dtree.size([dviewerHeight, dviewerWidth]);
+        // Compute the new tree layout.
+        var nodes = dtree.nodes(droot).reverse(),
+            links = dtree.links(nodes);
+
+        // Set widths between levels based on node depth
+        nodes.forEach(function(d) {
+            d.y = (d.depth * 100); 
+        });
+
+        // Update the nodes…
+        var node = dealsGroup.selectAll("g.node")
+            .data(nodes, function(d) {
+                return d.id || (d.id = ++di);
+            });
+
+        // Enter any new nodes at the parent's previous position.
+        var nodeEnter = node.enter().append("g")
+            .attr("class", "node")
+            .attr("transform", function(d) {
+                return "translate(" + source.y0 + "," + source.x0 + ")";
+            })
+            .on("mouseover", function(d) {
+                tooltip.transition()        
+                        .duration(200)
+                        .style("opacity", .9);      
+                tooltip.html(d.name + "<br/>" + "  ")
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("width", "150px") 
+                        .style("top", (d3.event.pageY - 45) + "px");
+            })                  
+            .on("mouseout", function(d) {       
+                tooltip.transition()        
+                        .duration(500)
+                        .style("opacity", 0);   
+            })            
+            .on('click', dealsClick);
+
+        nodeEnter.append("circle")
+            .attr('class', 'nodeCircle')
+            .attr("r", 0)
+            .style("fill", function(d) {
+                return d._children ? "lightsteelblue" : "#fff";
+            });
+
+        var textspan = nodeEnter.append("text")
+                .attr("dy", ".20em")
+                .attr("text-anchor", "middle");
+        
+         var tspan1 = textspan.append('tspan');
+         var tspan2 = textspan.append('tspan');
+         
+         tspan1.text(function(d) { return Util.wordWrap(d.name, maxDisplayChar); })
+               .attr("dy", function(d) { return (d.amount ==='') ? "" : ".07em"; });
+         tspan2.text(function(d) { 
+                    if(d.amount){var tex = d.currencySymbol +  d.amount; return tex ;}
+                        return '';
+                    })
+                .attr("x", "0")
+                .attr("dy", "20");
+
+        // Update the text to reflect whether node has children or not.
+        node.select('text')
+            .attr("x", function(d) {
+                return d.children || d._children ? 0 : 0;
+            })
+            .attr("text-anchor", function(d) {
+                return d.children || d._children ? "middle" : "middle";
+            })
+
+        // Change the circle fill depending on whether it has children and is collapsed
+        node.select("circle.nodeCircle")
+            .attr("r",   function(d) {
+                var rval = 30;
+                switch(d.depth){
+                    case 0:
+                        rval = drootr;
+                        break;
+                    case 1:
+                        rval = dlevel1r;
+                        break;
+                    case 2:
+                    default:
+                        rval = dlevel2r;
+                                          
+                }
+                return rval;
+            })
+            .style("fill", function(d) {
+                return d._children ? "lightsteelblue" : d.colorFill;
+            });
+
+        // Transition nodes to their new position.
+        var nodeUpdate = node.transition()
+            .duration(duration)
+            .attr("transform", function(d) {
+                return "translate(" + d.y + "," + d.x + ")";
+            });
+
+        // Fade the text in
+        nodeUpdate.select("text")
+            .style("fill-opacity", 1);
+
+        // Transition exiting nodes to the parent's new position.
+        var nodeExit = node.exit().transition()
+            .duration(duration)
+            .attr("transform", function(d) {
+                return "translate(" + source.y + "," + source.x + ")";
+            })
+            .remove();
+
+        nodeExit.select("circle")
+            .attr("r", 0);
+
+        nodeExit.select("text")
+            .style("fill-opacity", 0);
+
+        // Update the links…
+        var link = dealsGroup.selectAll("path.link")
+            .data(links, function(d) {
+                return d.target.id;
+            });
+
+        // Enter any new links at the parent's previous position.
+        link.enter().insert("path", "g")
+            .attr("class", "link")
+            .attr("d", function(d) {
+                var o = {
+                    x: source.x0,
+                    y: source.y0
+                };
+                return ddiagonal({
+                    source: o,
+                    target: o
+                });
+            });
+
+        // Transition links to their new position.
+        link.transition()
+            .duration(duration)
+            .attr("d", ddiagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link.exit().transition()
+            .duration(duration)
+            .attr("d", function(d) {
+                var o = {
+                    x: source.x,
+                    y: source.y
+                };
+                return ddiagonal({
+                    source: o,
+                    target: o
+                });
+            })
+            .remove();
+
+        // Stash the old positions for transition.
+        nodes.forEach(function(d) {
+            d.x0 = d.x;
+            d.y0 = d.y;
+        });
+    }
+
+            // Define the root
+    droot = deals.data;
+    droot.x0 = dviewerHeight / 2;
+    droot.y0 = 0;
+    
+    // only show first level nodes
+    droot.children.forEach(collapse);
+    // Layout the tree initially and center on the root node.
+    dealsUpdate(droot);
+    dealsCenterNode(droot);
+    // deals over
+
+    
+    /**********************************************
+     * Properties D3 js
+     **********************************************/
+
+    function properties(){};
+    properties.data = {
+        name : "Properties",
+        count: 6,
+        colorFill: "#338BA7",
+        plusSign: false,
+        children : [
+            {
+                name : "Bayreuth, 6",
+                count: "n",           
+                colorFill: "#CDE9EE",
+                plusSign: true,
+                children : [
+                    {
+                        name : "Sponser",
+                        count: "",
+                        colorFill: "#D0BED2",
+                        plusSign: false
+                    },{
+                        name : "Tenant",
+                        count: "",
+                        colorFill: "#CDE9EE",
+                        plusSign: false
+                    }]
+            },{
+                name : "Lichtenfels, Mainau 16",
+                count: "n",           
+                colorFill: "#CDE9EE",
+                plusSign: true,
+                children : [
+                    {
+                        name : "Sponser",
+                        count: "",
+                        colorFill: "#D0BED2",
+                        plusSign: false
+                    },{
+                        name : "Tenant",
+                        count: "",
+                        colorFill: "#CDE9EE",
+                        plusSign: false
+                    }]
+            },
+            {
+                name : "Munchberg",
+                count: "n",           
+                colorFill: "#CDE9EE",
+                plusSign: true,
+                children : [
+                    {
+                        name : "Sponser",
+                        count: "",
+                        colorFill: "#D0BED2",
+                        plusSign: false
+                    },{
+                        name : "Tenant",
+                        count: "",
+                        colorFill: "#CDE9EE",
+                        plusSign: false
+                    }]
+            },
+            {
+                name : "Munnerstadt",
+                count: "n",           
+                colorFill: "#CDE9EE",
+                plusSign: true,
+                children : [
+                    {
+                        name : "Sponser",
+                        count: "",
+                        colorFill: "#D0BED2",
+                        plusSign: false
+                    },{
+                        name : "Tenant",
+                        count: "",
+                        colorFill: "#CDE9EE",
+                        plusSign: false
+                    }]
+            },
+            {
+                name : "Beckum",
+                count: "n",           
+                colorFill: "#CDE9EE",
+                plusSign: true,
+                children : [
+                    {
+                        name : "Sponser",
+                        count: "",
+                        colorFill: "#D0BED2",
+                        plusSign: false
+                    },{
+                        name : "Tenant",
+                        count: "",
+                        colorFill: "#CDE9EE",
+                        plusSign: false
+                    }]
+            }
+    ]};
+
+    // properties config
+    var pdiameter = 800;
+    var pnodedepth = 90;
+    var prootr = 40;
+    var plevel1r = 35;
+    var plevel2r = 25;
+
+    var pwidth = pdiameter,
+        pheight = pdiameter;
+
+    var pi = 0,
+        proot;
+
+    var ptree = d3.layout.tree()
+        .size([360, pheight])
+        .separation(function(a, b) { return (a.parent == b.parent ? 5 : 10) / a.depth; });
+
+    var pdiagonal = d3.svg.diagonal.radial()
+        .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
+
+    var propertiesGroup = container.append("g")
+        .attr("transform", "translate(200,200)");
+
+   // Define the root
+    proot = properties.data;
+    proot.x0 = pheight / 2;
+    proot.y0 = 0;
+    
+    // only show first level nodes
+    proot.children.forEach(collapse);
+    
+    // Layout the tree initially and center on the root node.
+    propertiesUpdate(proot);
+    propertiesCenterNode(proot);
+    
+    function propertiesUpdate(source) {       
+        // Compute the new tree layout.
+        var nodes = ptree.nodes(proot),
+            links = ptree.links(nodes);
+        // Normalize for fixed-depth.
+        nodes.forEach(function(d) { d.y = d.depth * pnodedepth; });
+
+        // Update the nodes…
+        var node = propertiesGroup.selectAll("g.node")
+            .data(nodes, function(d) { return d.id || (d.id = ++pi); });
+        
+        // Enter any new nodes at the parent's previous position.
+        var nodeEnter = node.enter().append("g")
+            .attr("class", "node")
+            .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+            .on("mouseover", function(d) {
+                tooltip.transition()        
+                        .duration(200)
+                        .style("opacity", .9);      
+                tooltip.html(d.name + "<br/>"  + " ")
+                        .style("left", (d3.event.pageX) + "px")     
+                        .style("top", (d3.event.pageY - 28) + "px");
+            })                  
+            .on("mouseout", function(d) {       
+                tooltip.transition()        
+                        .duration(500)
+                        .style("opacity", 0);   
+            })
+            .on("click", propertiesClick);
+ 
+
+        nodeEnter.append("circle")
+            .attr("r", 1e-6)
+            .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+    
+        nodeEnter.append("text")
+            .attr("x", 10)
+            .attr("dy", ".35em")
+            .attr("text-anchor", "middle")
+            .attr("transform", function(d) { return d.x < 180 ? "translate(0)" : "translate(-" + (d.name.length * 8.5)  + ")"; })
+            .text(function(d) { 
+                //var nam = wordWrap(d.name, 10);}return nam; 
+                var nap = Util.getLimitedChar(d.name, 10); 
+                if(d.count!='' && d.count!='n'){nap = nap + '(' + d.count+')'};
+                return nap; })
+            .style("fill-opacity", 1e-6);
+       
+       // Transition nodes to their new position.
+       var nodeUpdate = node.transition()
+            .duration(duration)
+            .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+
+        nodeUpdate.select("circle")
+            .attr("r", function(d) {
+                var rval = 30;
+                switch(d.depth){
+                    case 0:
+                        rval = prootr;
+                        break;
+                    case 1:
+                        rval = plevel1r;
+                        break;
+                    case 2:
+                    default:
+                        rval = plevel2r;
+                                          
+                }
+                return rval;
+            })
+            .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+    
+        nodeUpdate.select("text")
+            .style("fill-opacity", 1)
+            .attr("transform", function(d) { return  "rotate("+ ( -d.x + 90 )+ ")translate(-" + 10  + ")"; });
+            
+        var nodeExit = node.exit().transition()
+            .duration(duration)
+            .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+            .remove();
+
+        nodeExit.select("circle")
+            .attr("r", 1e-6);
+
+        nodeExit.select("text")
+            .style("fill-opacity", 1e-6);
+
+        // Update the links…
+        var link = propertiesGroup.selectAll("path.link")
+            .data(links, function(d) { return d.target.id; });
+
+        // Enter any new links at the parent's previous position.
+        link.enter().insert("path", "g")
+            .attr("class", "link")
+            .attr("d", function(d) {
+              var o = {x: source.x0, y: source.y0};
+              return pdiagonal({source: o, target: o});
+            });
+
+        // Transition links to their new position.
+        link.transition()
+            .duration(duration)
+            .attr("d", pdiagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link.exit().transition()
+            .duration(duration)
+            .attr("d", function(d) {
+              var o = {x: source.x, y: source.y};
+              return pdiagonal({source: o, target: o});
+            })
+            .remove();
+
+        // Stash the old positions for transition.
+        nodes.forEach(function(d) {
+          d.x0 = d.x;
+          d.y0 = d.y;
+        });
+    }
+
+    function propertiesCenterNode(source) {
+        // note center node is not implemented for property
+//        console.log()
+//        scale = zoom.scale();
+//        x = -source.x0;
+//        y = -source.y0;
+//         console.log('x val '+ x + 'y val '+y);
+//        x = y * scale + 250;
+//        y = x * scale + 200;
+//        console.log('x val '+ x + 'y val '+y);
+//        propertiesGroup.transition()
+//            .duration(duration)
+//            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
+//        zoom.scale(scale);
+       // zoom.translate([x, y]);
+      
+      // move loans 
+//      // adjust the space between properties and loans
+//       loansGroup.transition()
+//            .duration(duration)
+//            .attr("transform", "translate(" + ((x + 200) > 480 ? (x+480): (x + (480-x)))  + "," + 200 + ")scale(" + scale + ")");      
+    }
+    
+    function propertiesClick(d) {
+        if (d3.event.defaultPrevented) return; // click suppressed
+        d = toggleChildren(d);
+        propertiesUpdate(d);
+        propertiesCenterNode(d);
+    }    
+
+    /**********************************************
+     * Loans D3 js
+     **********************************************/
+    function loans(){}
+    
+    loans.data = {
+        name : "Loans",
+        count: 8,
+        colorFill: "#BADD8C",
+        currencySymbol: "",
+        amount: "",
+        children : [
+            {
+                name : "Antony Parc Office",
+                count: "n",
+                currencySymbol: "$",
+                amount: "80.1M",
+                colorFill: "#B0D9C4",
+                children : [
+                    {
+                        name : "B",
+                        count: "n",
+                        currencySymbol: "$",
+                        amount: "80.1M",
+                        colorFill: "#67CDDC"
+                    }]
+            },
+            {
+                name : "Aprirose Retail Portfolio",
+                count: "n",
+                currencySymbol: "$",
+                amount: "28.9M",
+                colorFill: "#B0D9C4"
+            },
+            {
+                name : "Eurocastle Portfolio",
+                count: "n",
+                currencySymbol: "$",
+                amount: "199.6M",
+                colorFill: "#B0D9C4",
+                children : [
+                    {
+                        name : "B",
+                        count: "n",
+                        currencySymbol: "$",
+                        amount: "2.6M",
+                        colorFill: "#67CDDC"
+                    }]            
+            },
+            {
+                name : "Metropolis Centre",
+                count: "n",
+                currencySymbol: "$",
+                amount: "59.3M",
+                colorFill: "#B0D9C4"
+            },
+            {
+                name : "Nextra Portfolio Italy",
+                count: "n",
+                currencySymbol: "$",
+                amount: "81.1M",
+                colorFill: "#B0D9C4"
+            },
+            {
+                name : "Orazio Portfolio",
+                count: "n",
+                currencySymbol: "$",
+                amount: "100M",
+                colorFill: "#B0D9C4",
+                children : [
+                    {
+                        name : "B",
+                        count: "n",
+                        currencySymbol: "$",
+                        amount: "206.3M",
+                        colorFill: "#67CDDC",
+                        children : [
+                            {
+                                name : "C",
+                                count: "n",
+                                currencySymbol: "$",
+                                amount: "2144.1M",
+                                colorFill: "#67CDDC"
+                            }] 
+                    }]
+            }
+    ]};
+
+    var lmargin = {top: 250, right: 20, bottom: 20, left: 260},
+            lwidth = 560 - lmargin.right - lmargin.left,
+            lheight = 700 - lmargin.top - lmargin.bottom;
+            
+    var li = 0;
+    var lroot;
+    var lnodesizex = 80;
+    var lnodesizey = 80;
+    var lnodedepth = 100;
+    var ltree = d3.layout.tree()
+        .nodeSize([lnodesizex, lnodesizey]);
+    var lrootr = 40;
+    var llevel1r = 35;
+    var llevel2r = 30;
+
+    var ldiagonal = d3.svg.diagonal()
+            .projection(function(d) { return [d.x, d.y]; });
+    
+    var loansGroup = container.append("g")
+                               .attr("transform", "translate(650,200)");     
+    
+    lroot = loans.data;
+    lroot.x0 = lheight / 2;
+    lroot.y0 = 0;
+    // display only first level
+    lroot.children.forEach(collapse);
+    
+    loansUpdate(lroot); 
+    loansCenterNode(lroot);
+    
+    function loansUpdate(source) {
+        // Compute the new tree layout.
+        var nodes = ltree.nodes(lroot).reverse();
+        var links = ltree.links(nodes);
+
+        // Normalize for fixed-depth. - parent to child
+        nodes.forEach(function(d) { d.y = d.depth * lnodedepth; });
+
+        // Update the nodes…
+        var node = loansGroup.selectAll("g.node")
+            .data(nodes, function(d) { return d.id || (d.id = ++li); });
+
+        // Enter any new nodes at the parent's previous position.
+        var nodeEnter = node.enter().append("svg:g")
+            .attr("class", "node")
+            .attr("transform", function(d) { return "translate(" + d.x + "," + (d.y + 10) + ")"; })
+            .on("mouseover", function(d) {
+                tooltip.transition()        
+                        .duration(200)
+                        .style("opacity", .9);      
+                tooltip.html(d.name + "<br/>"  + ( (d.amount)? (' ( '+ d.currencySymbol +  d.amount +' )') :"") )
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("width", "150px") 
+                        .style("top", (d3.event.pageY - 45) + "px");
+            })                  
+            .on("mouseout", function(d) {       
+                tooltip.transition()        
+                        .duration(500)
+                        .style("opacity", 0);   
+            })
+            .on("click", loansClick);
+
+        nodeEnter.append("svg:circle")
+            .attr("r", 1e-6)
+            .attr("y", "50")
+            .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+  
+        // text place
+         var textspan = nodeEnter.append("svg:text")
+                .attr("dy", ".25em")
+                .attr("text-anchor", "middle");
+         var tspan1 = textspan.append('tspan');
+         var tspan2 = textspan.append('tspan');
+         tspan1.text(function(d) { 
+             var na = Util.wordWrap(d.name, 10);
+             if(d.count !='' && d.count !='n'){
+                 var na = na + '('+ d.count + ') ';
+             }
+              return na ; })
+               .attr("dy", function(d) { return (d.amount =='') ? "" : ".07em"; });
+         tspan2.text(function(d) { var tex = d.currencySymbol +  d.amount; return tex ; })
+                .attr("x", "0")
+                .attr("dy", "20");
+        // Transition nodes to their new position.
+        var nodeUpdate = node.transition()
+            .duration(duration)
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        // node circle here
+        nodeUpdate.select("circle")
+            .attr("r",  function(d) {
+                var rval = 30;
+                switch(d.depth){
+                    case 0:
+                        rval = lrootr;
+                        break;
+                    case 1:
+                        rval = llevel1r;
+                        break;
+                    case 2:
+                    default:
+                        rval = llevel2r;
+                                          
+                }
+                return rval;
+            })
+            .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+
+        nodeUpdate.select("text")
+            .style("fill-opacity", 1);
+
+        // Transition exiting nodes to the parent's new position.
+        var nodeExit = node.exit().transition()
+            .duration(duration)
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+            .remove();
+
+        nodeExit.select("circle")
+            .attr("r", 1e-6);
+
+        nodeExit.select("text")
+            .style("fill-opacity", 1e-6);
+
+        // Update the links…
+        var link = loansGroup.selectAll("path.link")
+            .data(ltree.links(nodes), function(d) { return d.target.id; });
+
+        // Enter any new links at the parent's previous position.
+        link.enter().insert("svg:path", "g")
+            .attr("class", "link")
+            .attr("d", function(d) {
+              var o = {x: source.x0, y: source.y0};
+              return ldiagonal({source: o, target: o});
+            })
+          .transition()
+            .duration(duration)
+            .attr("d", ldiagonal);
+
+        // Transition links to their new position.
+        link.transition()
+            .duration(duration)
+            .attr("d", ldiagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link.exit().transition()
+            .duration(duration)
+            .attr("d", function(d) {
+              var o = {x: source.x, y: source.y};
+              return ldiagonal({source: o, target: o});
+            })
+            .remove();
+
+        // Stash the old positions for transition.
+        nodes.forEach(function(d) {
+          d.x0 = d.x;
+          d.y0 = d.y;
+        });
+    }
+    
+    function loansCenterNode(source) {
+        scale = zoom.scale();
+        x = -source.x0;
+        y = -source.y0;
+        x = x * scale + 650;
+        y = y * scale + 200;
+        loansGroup.transition()
+            .duration(duration)
+            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
+        zoom.scale(scale);
+
+        // adjust the space between loans and properties
+        propertiesGroup.transition()
+            .duration(duration)
+            //.attr("transform", "translate(" + (x - 300)  + "," + 200 + ")scale(" + scale + ")");
+            .attr("transform", function(d) {
+                var newxval = 200;
+                if(x < 650){
+                    newxval = 650 - x;
+                    newxval = 200 - newxval;
+                }
+                return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
+            });
+            
+      // adjust the space between loans and deals
+       dealsGroup.transition()
+            .duration(duration)
+            .attr("transform", function(d) {
+                var newxval = 950;
+                if(x > 650){
+                    newxval = x + 370;
+                    
+                }
+                return "translate(" + newxval  + "," + -15 + ")scale(" + scale + ")";
+            });
+    }
+
+    function loansClick(d) {
+        if (d3.event.defaultPrevented) return; // click suppressed
+        d = toggleChildren(d);
+        loansUpdate(d);
+        loansCenterNode(d);
+    } 
+
+    
+        
+function zoomed() {
+  container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+ // document ready end   
+});
+
+
+
+</script>
+</body>
+</html>
