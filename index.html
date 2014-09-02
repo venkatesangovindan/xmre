@@ -8,9 +8,11 @@
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <style>
         #social_graph{
-            width: 95%;
+            width: 100%;
             height: 450px;
-            margin: 10px 10px 10px 10px;
+           // margin: 10px 10px 10px 10px;
+            margin: 0px;
+            padding: 0px;
             border: 1px solid #7c7c7c
                 
         }
@@ -32,6 +34,26 @@
             box-shadow: 4px 4px 10px rbga(0, 0, 0, 0.4);
             pointer-events: none;  
         }
+        
+        .loansDefault {
+            fill: #7AD3AB;
+        }
+        .loansSelected {
+            fill: #98C73D;
+        }
+        .b-loansDefault {
+            fill: #7AD3AB;
+        }
+        .b-loansSelected {
+            fill: #98C73D;
+        }
+        .sun-juniorDefault {
+            fill: #EAEAEA;
+        }
+        .sun-juniorSelected {
+            fill: #CCCCCC;
+        }        
+       
     </style>
 </head>
 <body>
@@ -78,10 +100,11 @@ $( document ).ready(function() {
         }
         return d;
     }
-    
+    var windowwidth = $( window ).width();
+    console.log(windowwidth);
     var duration = 500;
-    var margin = {top: 5, right: 5, bottom: 5, left: 5},
-        width = 1200 - margin.left - margin.right,
+    var margin = {top: 5, right: 0, bottom: 5, left: 0},
+        width = windowwidth - margin.left - margin.right - 15,
         height = 450 - margin.top - margin.bottom;
     
     var zoom = d3.behavior.zoom()
@@ -92,22 +115,22 @@ $( document ).ready(function() {
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
+        .attr("viewBox", "0 0 " + width + " " + height )
+        .attr("overflow", "hidden")
         .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
         .call(zoom);
 
-var rect = svg.append("rect")
-    .attr("width", width)
-    .attr("height", height)
-    .style("fill", "none")
-    .style("pointer-events", "all");
+    var rect = svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all");
 
     var container = svg.append("g");
 
     var tooltip = d3.select("body").append("div")   
         .attr("class", "tooltip")               
         .style("opacity", 0);
-
-
     /**********************************************
      * Deals D3 js
      **********************************************/                 
@@ -115,37 +138,37 @@ var rect = svg.append("rect")
 
     deals.data = {
         name : "EURO 25X",
-        colorFill: "#67CDDC",
+        colorFill: "#98e6f1",
         currencySymbol: "$",
         amount: "80.1M",
         children : [
             {
                 name : "A",
-                colorFill: "#69A8D2",
+                colorFill: "#67cddc",
                 currencySymbol: "$",
                 amount: "80.1M",
             },
             {
                 name : "B",
-                colorFill: "#69A8D2",
+                colorFill: "#67cddc",
                 currencySymbol: "$",
                 amount: "80.1M",            
             },
             {
                 name : "C",
-                colorFill: "#69A8D2",
+                colorFill: "#67cddc",
                 currencySymbol: "$",
                 amount: "80.1M",            
             },
             {
                 name : "D",
-                colorFill: "#69A8D2",
+                colorFill: "#67cddc",
                 currencySymbol: "$",
                 amount: "80.1M",            
             },
             {
                 name : "E",
-                colorFill: "#69A8D2",
+                colorFill: "#67cddc",
                 currencySymbol: "$",
                 amount: "80.1M",            
                 children : [
@@ -177,15 +200,15 @@ var rect = svg.append("rect")
         });
         
     var dealsGroup = container.append("g")
-                               .attr("transform", "translate(950,0)");  
+                               .attr("transform", "translate(1000,0)");  
     // Function to center node when clicked so node doesn't get lost when collapsing/moving with large amount of children.
     function dealsCenterNode(source) {
         
         scale = zoom.scale();        
         x = -source.y0;
         y = -source.x0;
-        x = x * scale + 950;
-        y = y * scale + dviewerHeight / 2 - 15;        
+        x = x * scale + 1000;
+        y = y * scale + dviewerHeight / 2 - 10;        
         dealsGroup.transition()
             .duration(duration)
             .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
@@ -212,10 +235,10 @@ var rect = svg.append("rect")
              .attr("transform", function(d) {
                  var newxval = 650;
                  if(x < 950){
-                     newxval = 650 - (950 - x);
+                     newxval = 650 - (1000 - x);
 
                  }
-                 return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
+                 return "translate(" + newxval  + "," + 205 + ")scale(" + scale + ")";
              });          
       }
       
@@ -226,10 +249,10 @@ var rect = svg.append("rect")
              .attr("transform", function(d) {
                  var newxval = 200;
                  if(x < 950){
-                     newxval = 200 - (950 - x);
+                     newxval = 200 - (1000 - x);
 
                  }
-                 return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
+                 return "translate(" + newxval  + "," + 205 + ")scale(" + scale + ")";
              });          
       }      
 
@@ -430,95 +453,95 @@ var rect = svg.append("rect")
     properties.data = {
         name : "Properties",
         count: 6,
-        colorFill: "#338BA7",
+        colorFill: "#67cddc",
         plusSign: false,
         children : [
             {
                 name : "Bayreuth, 6",
                 count: "n",           
-                colorFill: "#CDE9EE",
+                colorFill: "#6EC0CE",
                 plusSign: true,
                 children : [
                     {
                         name : "Sponser",
                         count: "",
-                        colorFill: "#D0BED2",
+                        colorFill: "#E9E3FF",
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#CDE9EE",
+                        colorFill: "#EAEAEA",
                         plusSign: false
                     }]
             },{
                 name : "Lichtenfels, Mainau 16",
                 count: "n",           
-                colorFill: "#CDE9EE",
+                colorFill: "#6EC0CE",
                 plusSign: true,
                 children : [
                     {
                         name : "Sponser",
                         count: "",
-                        colorFill: "#D0BED2",
+                        colorFill: "#E9E3FF",
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#CDE9EE",
+                        colorFill: "#EAEAEA",
                         plusSign: false
                     }]
             },
             {
                 name : "Munchberg",
                 count: "n",           
-                colorFill: "#CDE9EE",
+                colorFill: "#6EC0CE",
                 plusSign: true,
                 children : [
                     {
                         name : "Sponser",
                         count: "",
-                        colorFill: "#D0BED2",
+                        colorFill: "#E9E3FF",
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#CDE9EE",
+                        colorFill: "#EAEAEA",
                         plusSign: false
                     }]
             },
             {
                 name : "Munnerstadt",
                 count: "n",           
-                colorFill: "#CDE9EE",
+                colorFill: "#6EC0CE",
                 plusSign: true,
                 children : [
                     {
                         name : "Sponser",
                         count: "",
-                        colorFill: "#D0BED2",
+                        colorFill: "#E9E3FF",
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#CDE9EE",
+                        colorFill: "#EAEAEA",
                         plusSign: false
                     }]
             },
             {
                 name : "Beckum",
                 count: "n",           
-                colorFill: "#CDE9EE",
+                colorFill: "#6EC0CE",
                 plusSign: true,
                 children : [
                     {
                         name : "Sponser",
                         count: "",
-                        colorFill: "#D0BED2",
+                        colorFill: "#E9E3FF",
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#CDE9EE",
+                        colorFill: "#EAEAEA",
                         plusSign: false
                     }]
             }
@@ -545,7 +568,7 @@ var rect = svg.append("rect")
         .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
 
     var propertiesGroup = container.append("g")
-        .attr("transform", "translate(200,200)");
+        .attr("transform", "translate(200,205)");
 
    // Define the root
     proot = properties.data;
@@ -716,23 +739,32 @@ var rect = svg.append("rect")
     loans.data = {
         name : "Loans",
         count: 8,
-        colorFill: "#BADD8C",
+        colorFill: "#98C73D",
         currencySymbol: "",
         amount: "",
+        colorDefault: "loansDefault",
+        colorSelected: "loansSelected",
+        sel: true,
         children : [
             {
                 name : "Antony Parc Office",
                 count: "n",
                 currencySymbol: "$",
                 amount: "80.1M",
-                colorFill: "#B0D9C4",
+                colorFill: "#7AD3AB",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false,
                 children : [
                     {
                         name : "B",
                         count: "n",
                         currencySymbol: "$",
                         amount: "80.1M",
-                        colorFill: "#67CDDC"
+                        colorDefault: "sun-juniorDefault",
+                        colorSelected: "sun-juniorSelected",                         
+                        colorFill: "#EAEAEA",
+                        sel: false
                     }]
             },
             {
@@ -740,21 +772,30 @@ var rect = svg.append("rect")
                 count: "n",
                 currencySymbol: "$",
                 amount: "28.9M",
-                colorFill: "#B0D9C4"
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                colorFill: "#7AD3AB",
+                sel: false
             },
             {
                 name : "Eurocastle Portfolio",
                 count: "n",
                 currencySymbol: "$",
                 amount: "199.6M",
-                colorFill: "#B0D9C4",
+                colorFill: "#7AD3AB",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false,
                 children : [
                     {
                         name : "B",
                         count: "n",
                         currencySymbol: "$",
                         amount: "2.6M",
-                        colorFill: "#67CDDC"
+                        colorDefault: "sun-juniorDefault",
+                        colorSelected: "sun-juniorSelected",
+                        sel: false,
+                        colorFill: "#EAEAEA"
                     }]            
             },
             {
@@ -762,35 +803,50 @@ var rect = svg.append("rect")
                 count: "n",
                 currencySymbol: "$",
                 amount: "59.3M",
-                colorFill: "#B0D9C4"
+                colorFill: "#7AD3AB",
+                sel: false,
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected"                
             },
             {
                 name : "Nextra Portfolio Italy",
                 count: "n",
                 currencySymbol: "$",
                 amount: "81.1M",
-                colorFill: "#B0D9C4"
+                colorFill: "#7AD3AB",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false
             },
             {
                 name : "Orazio Portfolio",
                 count: "n",
                 currencySymbol: "$",
                 amount: "100M",
-                colorFill: "#B0D9C4",
+                colorFill: "#7AD3AB",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false,
                 children : [
                     {
                         name : "B",
                         count: "n",
                         currencySymbol: "$",
                         amount: "206.3M",
-                        colorFill: "#67CDDC",
+                        colorFill: "#EAEAEA",
+                        colorDefault: "sun-juniorDefault",
+                        colorSelected: "sun-juniorSelected", 
+                        sel: false,
                         children : [
                             {
                                 name : "C",
                                 count: "n",
                                 currencySymbol: "$",
                                 amount: "2144.1M",
-                                colorFill: "#67CDDC"
+                                colorDefault: "sun-juniorDefault",
+                                colorSelected: "sun-juniorSelected",                                  
+                                colorFill: "#EAEAEA",
+                                sel: false
                             }] 
                     }]
             }
@@ -815,7 +871,7 @@ var rect = svg.append("rect")
             .projection(function(d) { return [d.x, d.y]; });
     
     var loansGroup = container.append("g")
-                               .attr("transform", "translate(650,200)");     
+                               .attr("transform", "translate(650,205)");     
     
     lroot = loans.data;
     lroot.x0 = lheight / 2;
@@ -860,8 +916,8 @@ var rect = svg.append("rect")
 
         nodeEnter.append("svg:circle")
             .attr("r", 1e-6)
-            .attr("y", "50")
-            .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+            .attr("y", "50");
+         //   .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
   
         // text place
          var textspan = nodeEnter.append("svg:text")
@@ -901,7 +957,9 @@ var rect = svg.append("rect")
                 }
                 return rval;
             })
-            .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+            .attr("class", function(d) {//console.log(d);  
+        return d.sel ? d.colorDefault : d.colorSelected; });
+            //.style("fill", function(d) {console.log(d); return d._children ? "lightsteelblue" : d.colorFill; });
 
         nodeUpdate.select("text")
             .style("fill-opacity", 1);
@@ -955,47 +1013,65 @@ var rect = svg.append("rect")
     }
     
     function loansCenterNode(source) {
-        scale = zoom.scale();
-        x = -source.x0;
-        y = -source.y0;
-        x = x * scale + 650;
-        y = y * scale + 200;
-        loansGroup.transition()
-            .duration(duration)
-            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
-        zoom.scale(scale);
-
-        // adjust the space between loans and properties
-        propertiesGroup.transition()
-            .duration(duration)
-            //.attr("transform", "translate(" + (x - 300)  + "," + 200 + ")scale(" + scale + ")");
-            .attr("transform", function(d) {
-                var newxval = 200;
-                if(x < 650){
-                    newxval = 650 - x;
-                    newxval = 200 - newxval;
-                }
-                return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
-            });
-            
-      // adjust the space between loans and deals
-       dealsGroup.transition()
-            .duration(duration)
-            .attr("transform", function(d) {
-                var newxval = 950;
-                if(x > 650){
-                    newxval = x + 370;
-                    
-                }
-                return "translate(" + newxval  + "," + -15 + ")scale(" + scale + ")";
-            });
+//        scale = zoom.scale();
+//        x = -source.x0;
+//        y = -source.y0;
+//        x = x * scale + 650;
+//        y = y * scale + 200;
+//        loansGroup.transition()
+//            .duration(duration)
+//            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
+//        zoom.scale(scale);
+//
+//        // adjust the space between loans and properties
+//        propertiesGroup.transition()
+//            .duration(duration)
+//            //.attr("transform", "translate(" + (x - 300)  + "," + 200 + ")scale(" + scale + ")");
+//            .attr("transform", function(d) {
+//                var newxval = 200;
+//                if(x < 650){
+//                    newxval = 650 - x;
+//                    newxval = 200 - newxval;
+//                }
+//                return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
+//            });
+//            
+//      // adjust the space between loans and deals
+//       dealsGroup.transition()
+//            .duration(duration)
+//            .attr("transform", function(d) {
+//                var newxval = 950;
+//                if(x > 650){
+//                    newxval = x + 370;
+//                    
+//                }
+//                return "translate(" + newxval  + "," + -15 + ")scale(" + scale + ")";
+//            });
     }
 
     function loansClick(d) {
+        // change the color for selected one.
+      //  console.log("d here " +d);
+        if(d.depth!=0){
+            d.sel = true;
+//            if(d.depth > 1 && d.parent){
+//                d.parent.sel = true
+//            }
+        }
+       
         if (d3.event.defaultPrevented) return; // click suppressed
         d = toggleChildren(d);
         loansUpdate(d);
         loansCenterNode(d);
+        
+        if(d.depth!=0){
+            d.sel = false;           
+//            if(d.depth > 1 && d.parent){
+//                d.parent.sel = false;
+//            }
+        }
+        
+        
     } 
 
     
