@@ -7,6 +7,12 @@
     <script src="js/util.js"></script>
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <style>
+.axis line {
+  fill: none;
+  stroke: #ddd;
+  shape-rendering: crispEdges;
+  vector-effect: non-scaling-stroke;
+}        
         #social_graph{
             width: 100%;
             height: 450px;
@@ -52,7 +58,46 @@
         }
         .sun-juniorSelected {
             fill: #CCCCCC;
+        }
+        .dealsDefault {
+            fill: #CCCCCC;
+        }
+        .dealsSelected {
+            fill: #67cddc;
+        }
+        .tranchesDefault {
+            fill: #98e6f1;
+        }
+        .tranchesSelected {
+            fill: #67cddc;
+        }
+        .propertiesDefault {
+            fill: #6EC0CE;
+        }
+        .propertiesSelected {
+            fill: #67cddc;
+        }
+        .properties-singleDefault {
+            fill: #6EC0CE;
+        }
+        .properties-singleSelected {
+            fill: #67cddc;
+        }
+        .tenantDefault {
+            fill: #EAEAEA;
+        }
+        .tenantSelected {
+            fill: #CCCCCC;
+        }
+        .sponsorDefault {
+            fill: #E9E3FF;
+        }
+        .sponsorSelected {
+            fill: #D6CCF2;
         }        
+        .loansToProperties,  .dealsToLoans{
+            stroke: #ccc;
+        }
        
     </style>
 </head>
@@ -131,6 +176,92 @@ $( document ).ready(function() {
     var tooltip = d3.select("body").append("div")   
         .attr("class", "tooltip")               
         .style("opacity", 0);
+
+    // find the start positions here
+    var dealsStart = windowwidth / 100 * 80 ; // start after 80 %
+    var propertiesStart = windowwidth / 100 * 20 ; // start after 20 %
+    var loansStart = windowwidth / 100 * 55 ; // start after 40 %
+    
+    // initial configs
+    // deals
+    var drootr = 40;
+    var dlevel1r = 30;
+    var dlevel2r = 25;
+    var dnodedepth = 100;
+    
+    if(dealsStart < 1000){
+        drootr = 30;
+        dlevel1r = 25;
+        dlevel2r = 20;
+        dnodedepth = 80;
+    }
+    
+    // properties    
+    var prootr = 40;
+    var plevel1r = 35;
+    var plevel2r = 25;
+    var pnodedepth = 90;
+    
+    if(propertiesStart < 200){
+        prootr = 30;
+        plevel1r = 25;
+        plevel2r = 20;        
+        pnodedepth = 70;
+        
+    }
+    // loans
+    var lrootr = 40;
+    var llevel1r = 35;
+    var llevel2r = 30;
+    var lnodesizex = 80;
+    var lnodesizey = 80;
+    var lnodedepth = 100;    
+    
+    if(loansStart < 650){
+        lrootr = 30;
+        llevel1r = 25;
+        llevel2r = 20;        
+        lnodesizex = 60;
+        lnodesizey = 30;
+        lnodedepth = 80;
+    }    
+    
+    // Draw straight lines between loans and properties    
+    var loansToPropertiesLine = container.append("g:line")
+        .attr("x1", propertiesStart + prootr)
+        .attr("y1", 205)
+        .attr("x2", loansStart - lrootr)
+        .attr("y2", 205)
+        .attr("class", "loansToProperties"); 
+    // Draw straight lines between deals and loans
+    var dealsToLoansLine = container.append("g:line")
+        .attr("x1", loansStart + lrootr)
+        .attr("y1", 205)
+        .attr("x2", dealsStart - drootr)
+        .attr("y2", 205)
+        .attr("class", "dealsToLoans");
+    
+    
+//container.append("g")
+//    .attr("class", "x axis")
+//  .selectAll("line")
+//    .data(d3.range(0, width, 10))
+//  .enter().append("line")
+//    .attr("x1", function(d) { return d; })
+//    .attr("y1", 0)
+//    .attr("x2", function(d) { return d; })
+//    .attr("y2", height);
+//
+//container.append("g")
+//    .attr("class", "y axis")
+//  .selectAll("line")
+//    .data(d3.range(0, height, 10))
+//  .enter().append("line")
+//    .attr("x1", 0)
+//    .attr("y1", function(d) { return d; })
+//    .attr("x2", width)
+//    .attr("y2", function(d) { return d; });
+
     /**********************************************
      * Deals D3 js
      **********************************************/                 
@@ -138,43 +269,56 @@ $( document ).ready(function() {
 
     deals.data = {
         name : "EURO 25X",
-        colorFill: "#98e6f1",
         currencySymbol: "$",
         amount: "80.1M",
+        colorDefault: "dealsDefault",
+        colorSelected: "dealsSelected",
+        sel: true,        
         children : [
             {
                 name : "A",
-                colorFill: "#67cddc",
                 currencySymbol: "$",
                 amount: "80.1M",
+                colorDefault: "tranchesDefault",
+                colorSelected: "tranchesSelected",
+                sel: false                 
             },
             {
                 name : "B",
-                colorFill: "#67cddc",
                 currencySymbol: "$",
-                amount: "80.1M",            
+                amount: "80.1M", 
+                colorDefault: "tranchesDefault",
+                colorSelected: "tranchesSelected",
+                sel: false                 
             },
             {
                 name : "C",
-                colorFill: "#67cddc",
                 currencySymbol: "$",
-                amount: "80.1M",            
+                amount: "80.1M",
+                colorDefault: "tranchesDefault",
+                colorSelected: "tranchesSelected",
+                sel: false                 
             },
             {
                 name : "D",
-                colorFill: "#67cddc",
                 currencySymbol: "$",
-                amount: "80.1M",            
+                amount: "80.1M",
+                colorDefault: "tranchesDefault",
+                colorSelected: "tranchesSelected",
+                sel: false                 
             },
             {
                 name : "E",
-                colorFill: "#67cddc",
                 currencySymbol: "$",
-                amount: "80.1M",            
+                amount: "80.1M",
+                colorDefault: "tranchesDefault",
+                colorSelected: "tranchesSelected",
+                sel: false,
                 children : [
-                    {name : "H 1", colorFill: "#BADD8C"},
-                    {name : "H 2", colorFill: "#BADD8C"},
-                    {name : "H 3", colorFill: "#BADD8C"} ]
+                    {name : "H 1", colorDefault: "tranchesDefault", colorSelected: "tranchesSelected", sel: false},
+                    {name : "H 2", colorDefault: "tranchesDefault", colorSelected: "tranchesSelected", sel: false},
+                    {name : "H 3", colorDefault: "tranchesDefault", colorSelected: "tranchesSelected", sel: false}
+                ]
             }
     ]};
              
@@ -185,10 +329,8 @@ $( document ).ready(function() {
 
     // size of the diagram
     var dviewerWidth = 800;
-    var dviewerHeight = 430;
-    var drootr = 40;
-    var dlevel1r = 30;
-    var dlevel2r = 25;
+    var dviewerHeight = 450;
+
 
     var dtree = d3.layout.tree()
        .size([dviewerHeight, dviewerWidth]);
@@ -199,21 +341,23 @@ $( document ).ready(function() {
             return [d.y, d.x];
         });
         
+
+
     var dealsGroup = container.append("g")
-                               .attr("transform", "translate(1000,0)");  
+                               .attr("transform", "translate("+ dealsStart+ ",-20)");  
     // Function to center node when clicked so node doesn't get lost when collapsing/moving with large amount of children.
     function dealsCenterNode(source) {
         
-        scale = zoom.scale();        
-        x = -source.y0;
-        y = -source.x0;
-        x = x * scale + 1000;
-        y = y * scale + dviewerHeight / 2 - 10;        
-        dealsGroup.transition()
-            .duration(duration)
-            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
-
-        zoom.scale(scale);
+//        scale = zoom.scale();        
+//        x = -source.y0;
+//     //   y = -source.x0;
+//        x = x * scale + 1000;
+//        y = y * scale + dviewerHeight / 2 - 10;        
+//        dealsGroup.transition()
+//            .duration(duration)
+//            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
+//
+//        zoom.scale(scale);
         
         // adjust the space between loans and properties
 //        propertiesGroup.transition()
@@ -229,42 +373,56 @@ $( document ).ready(function() {
 //            });
             
       // adjust the space between deals and loans
-      if(loansGroup){
-        loansGroup.transition()
-             .duration(duration)
-             .attr("transform", function(d) {
-                 var newxval = 650;
-                 if(x < 950){
-                     newxval = 650 - (1000 - x);
-
-                 }
-                 return "translate(" + newxval  + "," + 205 + ")scale(" + scale + ")";
-             });          
-      }
-      
-      // adjust the space between properties and loans
-      if(propertiesGroup){
-        propertiesGroup.transition()
-             .duration(duration)
-             .attr("transform", function(d) {
-                 var newxval = 200;
-                 if(x < 950){
-                     newxval = 200 - (1000 - x);
-
-                 }
-                 return "translate(" + newxval  + "," + 205 + ")scale(" + scale + ")";
-             });          
-      }      
+//      if(loansGroup){
+//        loansGroup.transition()
+//             .duration(duration)
+//             .attr("transform", function(d) {
+//                 var newxval = 650;
+//                 if(x < 950){
+//                     newxval = 650 - (1000 - x);
+//
+//                 }
+//                 return "translate(" + newxval  + "," + 205 + ")scale(" + scale + ")";
+//             });          
+//      }
+//      
+//      // adjust the space between properties and loans
+//      if(propertiesGroup){
+//        propertiesGroup.transition()
+//             .duration(duration)
+//             .attr("transform", function(d) {
+//                 var newxval = 200;
+//                 if(x < 950){
+//                     newxval = 200 - (1000 - x);
+//
+//                 }
+//                 return "translate(" + newxval  + "," + 205 + ")scale(" + scale + ")";
+//             });          
+//      }      
 
 
     }
 
     function dealsClick(d) {
-        
         if (d3.event.defaultPrevented) return; // click suppressed
+        
+        if(d.depth!=0){
+            d.sel = true;
+            if(d.depth > 1 && d.parent){
+                d.parent.sel = true
+            }
+        }
+        
         d = toggleChildren(d);
         dealsUpdate(d);
         dealsCenterNode(d);
+        
+        if(d.depth!=0){
+            d.sel = false;           
+            if(d.depth > 1 && d.parent){
+                d.parent.sel = false;
+            }
+        }        
     }
 
     function dealsUpdate(source) {
@@ -275,7 +433,7 @@ $( document ).ready(function() {
 
         // Set widths between levels based on node depth
         nodes.forEach(function(d) {
-            d.y = (d.depth * 100); 
+            d.y = (d.depth * dnodedepth); 
         });
 
         // Update the nodes…
@@ -309,9 +467,9 @@ $( document ).ready(function() {
         nodeEnter.append("circle")
             .attr('class', 'nodeCircle')
             .attr("r", 0)
-            .style("fill", function(d) {
-                return d._children ? "lightsteelblue" : "#fff";
-            });
+          //  .style("fill", function(d) {
+           //     return d._children ? "lightsteelblue" : "#fff";
+           // });
 
         var textspan = nodeEnter.append("text")
                 .attr("dy", ".20em")
@@ -339,7 +497,7 @@ $( document ).ready(function() {
             })
 
         // Change the circle fill depending on whether it has children and is collapsed
-        node.select("circle.nodeCircle")
+        node.select("circle")
             .attr("r",   function(d) {
                 var rval = 30;
                 switch(d.depth){
@@ -356,9 +514,12 @@ $( document ).ready(function() {
                 }
                 return rval;
             })
-            .style("fill", function(d) {
-                return d._children ? "lightsteelblue" : d.colorFill;
+            .attr("class", function(d) {//console.log(d);  
+                            return d.sel ? d.colorSelected : d.colorDefault; 
             });
+//            .style("fill", function(d) {console.log(d); 
+//                return d._children ? "lightsteelblue" : "#AABBCC";
+//            });
 
         // Transition nodes to their new position.
         var nodeUpdate = node.transition()
@@ -453,95 +614,127 @@ $( document ).ready(function() {
     properties.data = {
         name : "Properties",
         count: 6,
-        colorFill: "#67cddc",
+        colorDefault: "propertiesDefault",
+        colorSelected: "propertiesSelected",
+        sel: true,
         plusSign: false,
         children : [
             {
                 name : "Bayreuth, 6",
                 count: "n",           
-                colorFill: "#6EC0CE",
                 plusSign: true,
+                colorDefault: "properties-singleDefault",
+                colorSelected: "properties-singleSelected",
+                sel: false,                
                 children : [
                     {
-                        name : "Sponser",
+                        name : "Sponsor",
                         count: "",
-                        colorFill: "#E9E3FF",
+                        colorDefault: "sponsorDefault",
+                        colorSelected: "sponsorSelected",
+                        sel: false,
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#EAEAEA",
+                        colorDefault: "tenantDefault",
+                        colorSelected: "tenantSelected",
+                        sel: false, 
                         plusSign: false
                     }]
             },{
                 name : "Lichtenfels, Mainau 16",
                 count: "n",           
-                colorFill: "#6EC0CE",
                 plusSign: true,
+                colorDefault: "properties-singleDefault",
+                colorSelected: "properties-singleSelected",
+                sel: false,                  
                 children : [
                     {
-                        name : "Sponser",
+                        name : "Sponsor",
                         count: "",
-                        colorFill: "#E9E3FF",
+                        colorDefault: "sponsorDefault",
+                        colorSelected: "sponsorSelected",
+                        sel: false,                        
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#EAEAEA",
+                        colorDefault: "tenantDefault",
+                        colorSelected: "tenantSelected",
+                        sel: false, 
                         plusSign: false
                     }]
             },
             {
                 name : "Munchberg",
                 count: "n",           
-                colorFill: "#6EC0CE",
                 plusSign: true,
+                colorDefault: "properties-singleDefault",
+                colorSelected: "properties-singleSelected",
+                sel: false,                  
                 children : [
                     {
-                        name : "Sponser",
+                        name : "Sponsor",
                         count: "",
-                        colorFill: "#E9E3FF",
+                        colorDefault: "sponsorDefault",
+                        colorSelected: "sponsorSelected",
+                        sel: false,                        
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#EAEAEA",
+                        colorDefault: "tenantDefault",
+                        colorSelected: "tenantSelected",
+                        sel: false,                         
                         plusSign: false
                     }]
             },
             {
                 name : "Munnerstadt",
                 count: "n",           
-                colorFill: "#6EC0CE",
                 plusSign: true,
+                colorDefault: "properties-singleDefault",
+                colorSelected: "properties-singleSelected",
+                sel: false,                 
                 children : [
                     {
-                        name : "Sponser",
+                        name : "Sponsor",
                         count: "",
-                        colorFill: "#E9E3FF",
+                        colorDefault: "sponsorDefault",
+                        colorSelected: "sponsorSelected",
+                        sel: false,                        
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#EAEAEA",
+                        colorDefault: "tenantDefault",
+                        colorSelected: "tenantSelected",
+                        sel: false,                         
                         plusSign: false
                     }]
             },
             {
                 name : "Beckum",
                 count: "n",           
-                colorFill: "#6EC0CE",
                 plusSign: true,
+                colorDefault: "properties-singleDefault",
+                colorSelected: "properties-singleSelected",
+                sel: false,                
                 children : [
                     {
-                        name : "Sponser",
+                        name : "Sponsor",
                         count: "",
-                        colorFill: "#E9E3FF",
+                        colorDefault: "sponsorDefault",
+                        colorSelected: "sponsorSelected",
+                        sel: false,                        
                         plusSign: false
                     },{
                         name : "Tenant",
                         count: "",
-                        colorFill: "#EAEAEA",
+                        colorDefault: "tenantDefault",
+                        colorSelected: "tenantSelected",
+                        sel: false,                        
                         plusSign: false
                     }]
             }
@@ -549,10 +742,7 @@ $( document ).ready(function() {
 
     // properties config
     var pdiameter = 800;
-    var pnodedepth = 90;
-    var prootr = 40;
-    var plevel1r = 35;
-    var plevel2r = 25;
+
 
     var pwidth = pdiameter,
         pheight = pdiameter;
@@ -567,8 +757,13 @@ $( document ).ready(function() {
     var pdiagonal = d3.svg.diagonal.radial()
         .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
 
+
+
+    
+
+
     var propertiesGroup = container.append("g")
-        .attr("transform", "translate(200,205)");
+        .attr("transform", "translate("+ propertiesStart +",205)");
 
    // Define the root
     proot = properties.data;
@@ -615,7 +810,7 @@ $( document ).ready(function() {
 
         nodeEnter.append("circle")
             .attr("r", 1e-6)
-            .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+          //  .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
     
         nodeEnter.append("text")
             .attr("x", 10)
@@ -651,7 +846,10 @@ $( document ).ready(function() {
                 }
                 return rval;
             })
-            .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+            .attr("class", function(d) {//console.log(d);  
+                            return d.sel ? d.colorSelected : d.colorDefault; 
+            });
+          //  .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
     
         nodeUpdate.select("text")
             .style("fill-opacity", 1)
@@ -726,9 +924,24 @@ $( document ).ready(function() {
     
     function propertiesClick(d) {
         if (d3.event.defaultPrevented) return; // click suppressed
+        
+        if(d.depth!=0){
+            d.sel = true;
+            if(d.depth > 1 && d.parent){
+                d.parent.sel = true
+            }
+        }
+        
         d = toggleChildren(d);
         propertiesUpdate(d);
         propertiesCenterNode(d);
+
+        if(d.depth!=0){
+            d.sel = false;           
+            if(d.depth > 1 && d.parent){
+                d.parent.sel = false;
+            }
+        } 
     }    
 
     /**********************************************
@@ -738,8 +951,7 @@ $( document ).ready(function() {
     
     loans.data = {
         name : "Loans",
-        count: 8,
-        colorFill: "#98C73D",
+        count: 6,
         currencySymbol: "",
         amount: "",
         colorDefault: "loansDefault",
@@ -751,7 +963,6 @@ $( document ).ready(function() {
                 count: "n",
                 currencySymbol: "$",
                 amount: "80.1M",
-                colorFill: "#7AD3AB",
                 colorDefault: "b-loansDefault",
                 colorSelected: "b-loansSelected",
                 sel: false,
@@ -763,7 +974,6 @@ $( document ).ready(function() {
                         amount: "80.1M",
                         colorDefault: "sun-juniorDefault",
                         colorSelected: "sun-juniorSelected",                         
-                        colorFill: "#EAEAEA",
                         sel: false
                     }]
             },
@@ -774,7 +984,6 @@ $( document ).ready(function() {
                 amount: "28.9M",
                 colorDefault: "b-loansDefault",
                 colorSelected: "b-loansSelected",
-                colorFill: "#7AD3AB",
                 sel: false
             },
             {
@@ -782,7 +991,6 @@ $( document ).ready(function() {
                 count: "n",
                 currencySymbol: "$",
                 amount: "199.6M",
-                colorFill: "#7AD3AB",
                 colorDefault: "b-loansDefault",
                 colorSelected: "b-loansSelected",
                 sel: false,
@@ -794,8 +1002,7 @@ $( document ).ready(function() {
                         amount: "2.6M",
                         colorDefault: "sun-juniorDefault",
                         colorSelected: "sun-juniorSelected",
-                        sel: false,
-                        colorFill: "#EAEAEA"
+                        sel: false
                     }]            
             },
             {
@@ -803,17 +1010,15 @@ $( document ).ready(function() {
                 count: "n",
                 currencySymbol: "$",
                 amount: "59.3M",
-                colorFill: "#7AD3AB",
-                sel: false,
                 colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected"                
+                colorSelected: "b-loansSelected",
+                sel: false,                
             },
             {
                 name : "Nextra Portfolio Italy",
                 count: "n",
                 currencySymbol: "$",
                 amount: "81.1M",
-                colorFill: "#7AD3AB",
                 colorDefault: "b-loansDefault",
                 colorSelected: "b-loansSelected",
                 sel: false
@@ -823,7 +1028,6 @@ $( document ).ready(function() {
                 count: "n",
                 currencySymbol: "$",
                 amount: "100M",
-                colorFill: "#7AD3AB",
                 colorDefault: "b-loansDefault",
                 colorSelected: "b-loansSelected",
                 sel: false,
@@ -833,7 +1037,6 @@ $( document ).ready(function() {
                         count: "n",
                         currencySymbol: "$",
                         amount: "206.3M",
-                        colorFill: "#EAEAEA",
                         colorDefault: "sun-juniorDefault",
                         colorSelected: "sun-juniorSelected", 
                         sel: false,
@@ -845,7 +1048,6 @@ $( document ).ready(function() {
                                 amount: "2144.1M",
                                 colorDefault: "sun-juniorDefault",
                                 colorSelected: "sun-juniorSelected",                                  
-                                colorFill: "#EAEAEA",
                                 sel: false
                             }] 
                     }]
@@ -858,20 +1060,21 @@ $( document ).ready(function() {
             
     var li = 0;
     var lroot;
-    var lnodesizex = 80;
-    var lnodesizey = 80;
-    var lnodedepth = 100;
+
+        
+
+
+    
     var ltree = d3.layout.tree()
         .nodeSize([lnodesizex, lnodesizey]);
-    var lrootr = 40;
-    var llevel1r = 35;
-    var llevel2r = 30;
+
 
     var ldiagonal = d3.svg.diagonal()
             .projection(function(d) { return [d.x, d.y]; });
+
     
     var loansGroup = container.append("g")
-                               .attr("transform", "translate(650,205)");     
+                               .attr("transform", "translate("+ loansStart +",205)");     
     
     lroot = loans.data;
     lroot.x0 = lheight / 2;
@@ -1054,9 +1257,9 @@ $( document ).ready(function() {
       //  console.log("d here " +d);
         if(d.depth!=0){
             d.sel = true;
-//            if(d.depth > 1 && d.parent){
-//                d.parent.sel = true
-//            }
+            if(d.depth > 1 && d.parent){
+                d.parent.sel = true
+            }
         }
        
         if (d3.event.defaultPrevented) return; // click suppressed
@@ -1064,11 +1267,11 @@ $( document ).ready(function() {
         loansUpdate(d);
         loansCenterNode(d);
         
-        if(d.depth!=0){
+        if(d.depth!==0){
             d.sel = false;           
-//            if(d.depth > 1 && d.parent){
-//                d.parent.sel = false;
-//            }
+            if(d.depth > 1 && d.parent){
+                d.parent.sel = false;
+            }
         }
         
         
@@ -1080,6 +1283,21 @@ function zoomed() {
   container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 
+
+
+
+
+
+
+    
+$(window).resize(function(){
+    location.reload();
+//  windowwidth = $( window ).width();
+//  console.log('resize calling');
+//  propertiesUpdate(proot);
+//  loansUpdate(lroot);
+//  dealsUpdate(droot);
+});
  // document ready end   
 });
 
