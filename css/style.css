@@ -1,51 +1,119 @@
-/*
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
-*/
 /* 
     Created on : Aug 22, 2014, 4:36:55 PM
-    Author     : Administrator
+    Author     : Aditi
 */
-        .float_left{
-            float: left;
-        }
-        #chart_properties{           
-            width: 350px;
-           // border: 1px solid #7c7c7c;
-        }
-        #chart_loans{
-          //  width: 550px;
-          //  border: 1px solid #7c7c7c;
-        }
+
+#social_graph{
+    width: 100%;
+    height: 450px;
+    margin: 0px;
+    padding: 0px;
+    border: 1px solid #7c7c7c
+
+}
+div.tooltip {
+    position: absolute;
+    width: 100px;
+    height: auto;
+    text-align: center;           
+    padding: 5px;             
+    font: 12px sans-serif;        
+    background-color: #D4D4D4;  
+    border: 0px; 
+    pointer-events: none;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -mox-box-shadow: 4px 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rbga(0, 0, 0, 0.4);
+    pointer-events: none;  
+}
         
-        #chart_deals{
-            width: 620px;
-          //  border: 1px solid #7c7c7c;
-        }
-        #container {
-            width: 100%;
-        }
+.float_left{
+    float: left;
+}
+#container {
+    width: 100%;
+}
 
-    path.link {
-        fill: none;
-        stroke: #ccc;
-        stroke-width: 1.5px;
-    }
-    .node {
-        cursor: pointer;
-    }
+path.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+}
+.node {
+    cursor: pointer;
+}
 
-    .overlay{
-        background-color:#EEE;
-    }
+.node circle {
+    stroke-width: 1.5px;
+}
 
-    .node circle {
-      stroke-width: 1.5px;
-    }
+.node text {
+    font-size:10px; 
+    font-family:sans-serif;     
+}
 
-    .node text {
-      font-size:10px; 
-      font-family:sans-serif;     
-    }
+/* Color code for circles */
+        
+.loansDefault {
+    fill: #7AD3AB;
+}
+.loansSelected {
+    fill: #98C73D;
+}
+.b-loansDefault {
+    fill: #7AD3AB;
+}
+.b-loansSelected {
+    fill: #98C73D;
+}
+.sun-juniorDefault {
+    fill: #EAEAEA;
+}
+.sun-juniorSelected {
+    fill: #CCCCCC;
+}
+.dealsDefault {
+    fill: #CCCCCC;
+}
+.dealsSelected {
+    fill: #67cddc;
+}
+.tranchesDefault {
+    fill: #98e6f1;
+}
+.tranchesSelected {
+    fill: #67cddc;
+}
+.propertiesDefault {
+    fill: #6EC0CE;
+}
+.propertiesSelected {
+    fill: #67cddc;
+}
+.properties-singleDefault {
+    fill: #6EC0CE;
+}
+.properties-singleSelected {
+    fill: #67cddc;
+}
+.tenantDefault {
+    fill: #EAEAEA;
+}
+.tenantSelected {
+    fill: #CCCCCC;
+}
+.sponsorDefault {
+    fill: #E9E3FF;
+}
+.sponsorSelected {
+    fill: #D6CCF2;
+}        
+.loansToProperties,  .dealsToLoans{
+    stroke: #ccc;
+}
+
+
 

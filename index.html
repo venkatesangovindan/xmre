@@ -13,92 +13,7 @@
   shape-rendering: crispEdges;
   vector-effect: non-scaling-stroke;
 }        
-        #social_graph{
-            width: 100%;
-            height: 450px;
-           // margin: 10px 10px 10px 10px;
-            margin: 0px;
-            padding: 0px;
-            border: 1px solid #7c7c7c
-                
-        }
-        div.tooltip {
-            position: absolute;
-            width: 100px;
-            height: auto;
-            text-align: center;           
-            padding: 5px;             
-            font: 12px sans-serif;        
-            background-color: #D4D4D4;  
-            border: 0px; 
-            pointer-events: none;
-            -webkit-border-radius: 10px;
-            -moz-border-radius: 10px;
-            border-radius: 10px;
-            -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-            -mox-box-shadow: 4px 4px 4px 10px rgba(0, 0, 0, 0.4);
-            box-shadow: 4px 4px 10px rbga(0, 0, 0, 0.4);
-            pointer-events: none;  
-        }
-        
-        .loansDefault {
-            fill: #7AD3AB;
-        }
-        .loansSelected {
-            fill: #98C73D;
-        }
-        .b-loansDefault {
-            fill: #7AD3AB;
-        }
-        .b-loansSelected {
-            fill: #98C73D;
-        }
-        .sun-juniorDefault {
-            fill: #EAEAEA;
-        }
-        .sun-juniorSelected {
-            fill: #CCCCCC;
-        }
-        .dealsDefault {
-            fill: #CCCCCC;
-        }
-        .dealsSelected {
-            fill: #67cddc;
-        }
-        .tranchesDefault {
-            fill: #98e6f1;
-        }
-        .tranchesSelected {
-            fill: #67cddc;
-        }
-        .propertiesDefault {
-            fill: #6EC0CE;
-        }
-        .propertiesSelected {
-            fill: #67cddc;
-        }
-        .properties-singleDefault {
-            fill: #6EC0CE;
-        }
-        .properties-singleSelected {
-            fill: #67cddc;
-        }
-        .tenantDefault {
-            fill: #EAEAEA;
-        }
-        .tenantSelected {
-            fill: #CCCCCC;
-        }
-        .sponsorDefault {
-            fill: #E9E3FF;
-        }
-        .sponsorSelected {
-            fill: #D6CCF2;
-        }        
-        .loansToProperties,  .dealsToLoans{
-            stroke: #ccc;
-        }
-       
+
     </style>
 </head>
 <body>
@@ -110,10 +25,8 @@
 $( document ).ready(function() {
         
     /*********************************
-     * Common functions and variables
+     * Common functions and variables - Helper functions for collapsing and expanding nodes.
      *********************************/
-
-    // Helper functions for collapsing and expanding nodes.
 
     function collapse(d) {
         if (d.children) {
@@ -131,9 +44,10 @@ $( document ).ready(function() {
         }
     }   
     // Toggle children function
-    function toggleChildren(d) {
-        // always show root node with one level
-        if(!d.parent){
+    function toggleChildren(d, rootToggle) {
+        
+        // rootToggle is false always show root node with one level
+        if(!rootToggle && !d.parent){
             return d;            
         }        
         if (d.children) {
@@ -145,20 +59,23 @@ $( document ).ready(function() {
         }
         return d;
     }
-    var windowwidth = $( window ).width();
-    console.log(windowwidth);
-    var duration = 500;
+    
+    var windowwidth = $( window ).width(); // window width
+    var sgraphHeight = 450;    
+    
     var margin = {top: 5, right: 0, bottom: 5, left: 0},
         width = windowwidth - margin.left - margin.right - 15,
-        height = 450 - margin.top - margin.bottom;
+        height = sgraphHeight - margin.top - margin.bottom;
+        
+    var duration = 500;
     
     var zoom = d3.behavior.zoom()
         .scaleExtent([1, 10])
         .on("zoom", zoomed);
 
     var svg = d3.select("#social_graph").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", "100%")
+        .attr("height", "100%")
         .append("g")
         .attr("viewBox", "0 0 " + width + " " + height )
         .attr("overflow", "hidden")
@@ -176,68 +93,97 @@ $( document ).ready(function() {
     var tooltip = d3.select("body").append("div")   
         .attr("class", "tooltip")               
         .style("opacity", 0);
-
-    // find the start positions here
-    var dealsStart = windowwidth / 100 * 80 ; // start after 80 %
-    var propertiesStart = windowwidth / 100 * 20 ; // start after 20 %
-    var loansStart = windowwidth / 100 * 55 ; // start after 40 %
-    
-    // initial configs
+   
+    /********************************************
+     * All the graph methods and configs
+     ********************************************/
     // deals
-    var drootr = 40;
-    var dlevel1r = 30;
-    var dlevel2r = 25;
-    var dnodedepth = 100;
+    function deals(){}    
+    // initial configs
+    // deals graph start position
+    deals.prototype.dealsStart = windowwidth / 100 * 80 ; // start after 80 % 
+    deals.prototype.drootr = 40;
+    deals.prototype.dlevel1r = 30;
+    deals.prototype.dnodedepth = 100;
     
-    if(dealsStart < 1000){
-        drootr = 30;
-        dlevel1r = 25;
-        dlevel2r = 20;
-        dnodedepth = 80;
+    deals.prototype.di = 0;    
+    deals.prototype.maxDisplayChar = 10;
+    deals.prototype.droot = '';
+    
+    deals.prototype.dviewerWidth = 800;
+    deals.prototype.dviewerHeight = 450;
+
+    var dealsObj = new deals();
+    
+    // for responsive
+    if(dealsObj.dealsStart < 1000){
+        dealsObj.drootr = 30;
+        dealsObj.dlevel1r = 25;
+        dealsObj.dnodedepth = 80;
     }
-    
-    // properties    
-    var prootr = 40;
-    var plevel1r = 35;
-    var plevel2r = 25;
-    var pnodedepth = 90;
-    
-    if(propertiesStart < 200){
-        prootr = 30;
-        plevel1r = 25;
-        plevel2r = 20;        
-        pnodedepth = 70;
-        
-    }
+
     // loans
-    var lrootr = 40;
-    var llevel1r = 35;
-    var llevel2r = 30;
-    var lnodesizex = 80;
-    var lnodesizey = 80;
-    var lnodedepth = 100;    
+    function loans(){}
+    // loans graph start position
+    loans.prototype.loansStart = windowwidth / 100 * 55 ; // start after 40 %
+    loans.prototype.lrootr = 40;
+    loans.prototype.llevel1r = 35;
+    loans.prototype.llevel2r = 30;
+    loans.prototype.lnodedepth = 100;
+    loans.prototype.lnodesizex = 80;
+    loans.prototype.lnodesizey = 80;    
     
-    if(loansStart < 650){
-        lrootr = 30;
-        llevel1r = 25;
-        llevel2r = 20;        
-        lnodesizex = 60;
-        lnodesizey = 30;
-        lnodedepth = 80;
+    loans.prototype.li = 0;    
+    loans.prototype.maxDisplayChar = 10;
+    loans.prototype.lroot = '';    
+    loans.prototype.lheight = 430;      
+  
+
+    var loansObj = new loans();
+        // for responsive
+    if(loansObj.loansStart < 650){
+        loansObj.lrootr = 30;
+        loansObj.llevel1r = 25;
+        loansObj.llevel2r = 20;        
+        loansObj.lnodesizex = 60;
+        loansObj.lnodesizey = 30;
+        loansObj.lnodedepth = 80;
     }    
     
+    // properties
+    function properties(){};    
+    // properties graph start position
+    properties.prototype.propertiesStart = windowwidth / 100 * 20 ; // start after 20 %
+    properties.prototype.prootr = 40;
+    properties.prototype.plevel1r = 35;
+    properties.prototype.plevel2r = 25;
+    properties.prototype.pnodedepth = 90;
+    properties.prototype.pheight = 800; 
+    
+    properties.prototype.pi = 0;    
+    properties.prototype.maxDisplayChar = 10;
+    properties.prototype.proot = '';
+
+    var propertiesObj = new properties();
+        // for responsive
+    if(propertiesObj.propertiesStart < 200){
+        propertiesObj.prootr = 30;
+        propertiesObj.plevel1r = 25;
+        propertiesObj.plevel2r = 20;
+        propertiesObj.pnodedepth = 70;
+    }    
     // Draw straight lines between loans and properties    
     var loansToPropertiesLine = container.append("g:line")
-        .attr("x1", propertiesStart + prootr)
+        .attr("x1", propertiesObj.propertiesStart + propertiesObj.prootr)
         .attr("y1", 205)
-        .attr("x2", loansStart - lrootr)
+        .attr("x2", loansObj.loansStart - loansObj.lrootr)
         .attr("y2", 205)
         .attr("class", "loansToProperties"); 
     // Draw straight lines between deals and loans
     var dealsToLoansLine = container.append("g:line")
-        .attr("x1", loansStart + lrootr)
+        .attr("x1", loansObj.loansStart + loansObj.lrootr)
         .attr("y1", 205)
-        .attr("x2", dealsStart - drootr)
+        .attr("x2", dealsObj.dealsStart - dealsObj.drootr)
         .attr("y2", 205)
         .attr("class", "dealsToLoans");
     
@@ -265,11 +211,11 @@ $( document ).ready(function() {
     /**********************************************
      * Deals D3 js
      **********************************************/                 
-    function deals(){}
+   
 
     deals.data = {
         name : "EURO 25X",
-        currencySymbol: "$",
+        currencySymbol: "&pound;",
         amount: "80.1M",
         colorDefault: "dealsDefault",
         colorSelected: "dealsSelected",
@@ -277,7 +223,7 @@ $( document ).ready(function() {
         children : [
             {
                 name : "A",
-                currencySymbol: "$",
+                currencySymbol: "&pound;",
                 amount: "80.1M",
                 colorDefault: "tranchesDefault",
                 colorSelected: "tranchesSelected",
@@ -285,7 +231,7 @@ $( document ).ready(function() {
             },
             {
                 name : "B",
-                currencySymbol: "$",
+                currencySymbol: "&pound;",
                 amount: "80.1M", 
                 colorDefault: "tranchesDefault",
                 colorSelected: "tranchesSelected",
@@ -293,7 +239,7 @@ $( document ).ready(function() {
             },
             {
                 name : "C",
-                currencySymbol: "$",
+                currencySymbol: "&pound;",
                 amount: "80.1M",
                 colorDefault: "tranchesDefault",
                 colorSelected: "tranchesSelected",
@@ -301,7 +247,7 @@ $( document ).ready(function() {
             },
             {
                 name : "D",
-                currencySymbol: "$",
+                currencySymbol: "&pound;",
                 amount: "80.1M",
                 colorDefault: "tranchesDefault",
                 colorSelected: "tranchesSelected",
@@ -309,99 +255,26 @@ $( document ).ready(function() {
             },
             {
                 name : "E",
-                currencySymbol: "$",
+                currencySymbol: "&pound;",
                 amount: "80.1M",
                 colorDefault: "tranchesDefault",
                 colorSelected: "tranchesSelected",
                 sel: false,
-                children : [
-                    {name : "H 1", colorDefault: "tranchesDefault", colorSelected: "tranchesSelected", sel: false},
-                    {name : "H 2", colorDefault: "tranchesDefault", colorSelected: "tranchesSelected", sel: false},
-                    {name : "H 3", colorDefault: "tranchesDefault", colorSelected: "tranchesSelected", sel: false}
-                ]
             }
     ]};
              
-    //variables
-    var di = 0;   
-    var droot;
-    var maxDisplayChar = 10;
-
-    // size of the diagram
-    var dviewerWidth = 800;
-    var dviewerHeight = 450;
-
 
     var dtree = d3.layout.tree()
-       .size([dviewerHeight, dviewerWidth]);
+       .size([dealsObj.dviewerHeight, dealsObj.dviewerWidth]);
 
     // define a d3 diagonal projection for use by the node paths later on.
     var ddiagonal = d3.svg.diagonal()
         .projection(function(d) {
             return [d.y, d.x];
         });
-        
-
 
     var dealsGroup = container.append("g")
-                               .attr("transform", "translate("+ dealsStart+ ",-20)");  
-    // Function to center node when clicked so node doesn't get lost when collapsing/moving with large amount of children.
-    function dealsCenterNode(source) {
-        
-//        scale = zoom.scale();        
-//        x = -source.y0;
-//     //   y = -source.x0;
-//        x = x * scale + 1000;
-//        y = y * scale + dviewerHeight / 2 - 10;        
-//        dealsGroup.transition()
-//            .duration(duration)
-//            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
-//
-//        zoom.scale(scale);
-        
-        // adjust the space between loans and properties
-//        propertiesGroup.transition()
-//            .duration(duration)
-//            //.attr("transform", "translate(" + (x - 300)  + "," + 200 + ")scale(" + scale + ")");
-//            .attr("transform", function(d) {
-//                var newxval = 200;
-//                if(x < 650){
-//                    newxval = 650 - x;
-//                    newxval = 200 - newxval;
-//                }
-//                return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
-//            });
-            
-      // adjust the space between deals and loans
-//      if(loansGroup){
-//        loansGroup.transition()
-//             .duration(duration)
-//             .attr("transform", function(d) {
-//                 var newxval = 650;
-//                 if(x < 950){
-//                     newxval = 650 - (1000 - x);
-//
-//                 }
-//                 return "translate(" + newxval  + "," + 205 + ")scale(" + scale + ")";
-//             });          
-//      }
-//      
-//      // adjust the space between properties and loans
-//      if(propertiesGroup){
-//        propertiesGroup.transition()
-//             .duration(duration)
-//             .attr("transform", function(d) {
-//                 var newxval = 200;
-//                 if(x < 950){
-//                     newxval = 200 - (1000 - x);
-//
-//                 }
-//                 return "translate(" + newxval  + "," + 205 + ")scale(" + scale + ")";
-//             });          
-//      }      
-
-
-    }
+                               .attr("transform", "translate("+ dealsObj.dealsStart + ",-20)");  
 
     function dealsClick(d) {
         if (d3.event.defaultPrevented) return; // click suppressed
@@ -413,9 +286,8 @@ $( document ).ready(function() {
             }
         }
         
-        d = toggleChildren(d);
+        d = toggleChildren(d, true);
         dealsUpdate(d);
-        dealsCenterNode(d);
         
         if(d.depth!=0){
             d.sel = false;           
@@ -426,20 +298,20 @@ $( document ).ready(function() {
     }
 
     function dealsUpdate(source) {
-        dtree = dtree.size([dviewerHeight, dviewerWidth]);
+        dtree = dtree.size([dealsObj.dviewerHeight, dealsObj.dviewerWidth]);
         // Compute the new tree layout.
-        var nodes = dtree.nodes(droot).reverse(),
+        var nodes = dtree.nodes(dealsObj.droot).reverse(),
             links = dtree.links(nodes);
 
         // Set widths between levels based on node depth
         nodes.forEach(function(d) {
-            d.y = (d.depth * dnodedepth); 
+            d.y = (d.depth * dealsObj.dnodedepth); 
         });
 
         // Update the nodes…
         var node = dealsGroup.selectAll("g.node")
             .data(nodes, function(d) {
-                return d.id || (d.id = ++di);
+                return d.id || (d.id = ++dealsObj.di);
             });
 
         // Enter any new nodes at the parent's previous position.
@@ -466,10 +338,7 @@ $( document ).ready(function() {
 
         nodeEnter.append("circle")
             .attr('class', 'nodeCircle')
-            .attr("r", 0)
-          //  .style("fill", function(d) {
-           //     return d._children ? "lightsteelblue" : "#fff";
-           // });
+            .attr("r", 0);
 
         var textspan = nodeEnter.append("text")
                 .attr("dy", ".20em")
@@ -478,14 +347,14 @@ $( document ).ready(function() {
          var tspan1 = textspan.append('tspan');
          var tspan2 = textspan.append('tspan');
          
-         tspan1.text(function(d) { return Util.wordWrap(d.name, maxDisplayChar); })
+         tspan1.text(function(d) { return Util.wordWrap(d.name, dealsObj.maxDisplayChar); })
                .attr("dy", function(d) { return (d.amount ==='') ? "" : ".07em"; });
-         tspan2.text(function(d) { 
+         tspan2.html(function(d) { 
                     if(d.amount){var tex = d.currencySymbol +  d.amount; return tex ;}
                         return '';
                     })
                 .attr("x", "0")
-                .attr("dy", "20");
+                .attr("dy", "15");
 
         // Update the text to reflect whether node has children or not.
         node.select('text')
@@ -502,24 +371,16 @@ $( document ).ready(function() {
                 var rval = 30;
                 switch(d.depth){
                     case 0:
-                        rval = drootr;
+                        rval = dealsObj.drootr;
                         break;
-                    case 1:
-                        rval = dlevel1r;
-                        break;
-                    case 2:
-                    default:
-                        rval = dlevel2r;
-                                          
+                    default:                        
+                        rval = dealsObj.dlevel1r;
                 }
                 return rval;
             })
             .attr("class", function(d) {//console.log(d);  
                             return d.sel ? d.colorSelected : d.colorDefault; 
             });
-//            .style("fill", function(d) {console.log(d); 
-//                return d._children ? "lightsteelblue" : "#AABBCC";
-//            });
 
         // Transition nodes to their new position.
         var nodeUpdate = node.transition()
@@ -593,24 +454,293 @@ $( document ).ready(function() {
         });
     }
 
-            // Define the root
-    droot = deals.data;
-    droot.x0 = dviewerHeight / 2;
-    droot.y0 = 0;
+    // Define the root
+    dealsObj.droot = deals.data;
+    dealsObj.droot.x0 = dealsObj.dviewerHeight / 2;
+    dealsObj.droot.y0 = 0;
     
     // only show first level nodes
-    droot.children.forEach(collapse);
-    // Layout the tree initially and center on the root node.
-    dealsUpdate(droot);
-    dealsCenterNode(droot);
-    // deals over
+    dealsObj.droot.children.forEach(collapse);
+    dealsUpdate(dealsObj.droot);
 
+    // deals over
+    /**********************************************
+     * Loans D3 js
+     **********************************************/
     
+    loans.data = {
+        name : "Loans",
+        count: 6,
+        currencySymbol: "",
+        amount: "",
+        colorDefault: "loansDefault",
+        colorSelected: "loansSelected",
+        sel: true,
+        children : [
+            {
+                name : "Antony Parc Office",
+                count: "n",
+                currencySymbol: "&pound;",
+                amount: "80.1M",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false,
+                children : [
+                    {
+                        name : "B",
+                        count: "n",
+                        currencySymbol: "&pound;",
+                        amount: "80.1M",
+                        colorDefault: "sun-juniorDefault",
+                        colorSelected: "sun-juniorSelected",                         
+                        sel: false
+                    }]
+            },
+            {
+                name : "Aprirose Retail Portfolio",
+                count: "n",
+                currencySymbol: "&pound;",
+                amount: "28.9M",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false
+            },
+            {
+                name : "Eurocastle Portfolio",
+                count: "n",
+                currencySymbol: "&pound;",
+                amount: "199.6M",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false,
+                children : [
+                    {
+                        name : "B",
+                        count: "n",
+                        currencySymbol: "&pound;",
+                        amount: "2.6M",
+                        colorDefault: "sun-juniorDefault",
+                        colorSelected: "sun-juniorSelected",
+                        sel: false
+                    }]            
+            },
+            {
+                name : "Metropolis Centre",
+                count: "n",
+                currencySymbol: "&pound;",
+                amount: "59.3M",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false,                
+            },
+            {
+                name : "Nextra Portfolio Italy",
+                count: "n",
+                currencySymbol: "&pound;",
+                amount: "81.1M",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false
+            },
+            {
+                name : "Orazio Portfolio",
+                count: "n",
+                currencySymbol: "&pound;",
+                amount: "100M",
+                colorDefault: "b-loansDefault",
+                colorSelected: "b-loansSelected",
+                sel: false,
+                children : [
+                    {
+                        name : "B",
+                        count: "n",
+                        currencySymbol: "&pound;",
+                        amount: "206.3M",
+                        colorDefault: "sun-juniorDefault",
+                        colorSelected: "sun-juniorSelected", 
+                        sel: false,
+                        children : [
+                            {
+                                name : "C",
+                                count: "n",
+                                currencySymbol: "&pound;",
+                                amount: "2144.1M",
+                                colorDefault: "sun-juniorDefault",
+                                colorSelected: "sun-juniorSelected",                                  
+                                sel: false
+                            }] 
+                    }]
+            }
+    ]};
+
+    var ltree = d3.layout.tree()
+        .nodeSize([loansObj.lnodesizex, loansObj.lnodesizey]);
+
+    var ldiagonal = d3.svg.diagonal()
+            .projection(function(d) { return [d.x, d.y]; });
+    
+    var loansGroup = container.append("g")
+                               .attr("transform", "translate("+ loansObj.loansStart +",205)");     
+    
+    loansObj.lroot = loans.data;
+    loansObj.lroot.x0 = loansObj.lheight / 2;
+    loansObj.lroot.y0 = 0;
+    // display only first level
+    loansObj.lroot.children.forEach(collapse);    
+    loansUpdate(loansObj.lroot); 
+    
+    function loansUpdate(source) {
+        // Compute the new tree layout.
+        var nodes = ltree.nodes(loansObj.lroot).reverse();
+        var links = ltree.links(nodes);
+
+        // Normalize for fixed-depth. - parent to child
+        nodes.forEach(function(d) { d.y = d.depth * loansObj.lnodedepth; });
+
+        // Update the nodes…
+        var node = loansGroup.selectAll("g.node")
+            .data(nodes, function(d) { return d.id || (d.id = ++loansObj.li); });
+
+        // Enter any new nodes at the parent's previous position.
+        var nodeEnter = node.enter().append("svg:g")
+            .attr("class", "node")
+            .attr("transform", function(d) { return "translate(" + d.x + "," + (d.y + 10) + ")"; })
+            .on("mouseover", function(d) {
+                tooltip.transition()        
+                        .duration(200)
+                        .style("opacity", .9);      
+                tooltip.html(d.name + "<br/>"  + ( (d.amount)? (' ( '+ d.currencySymbol +  d.amount +' )') :"") )
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("width", "150px") 
+                        .style("top", (d3.event.pageY - 45) + "px");
+            })                  
+            .on("mouseout", function(d) {       
+                tooltip.transition()        
+                        .duration(500)
+                        .style("opacity", 0);   
+            })
+            .on("click", loansClick);
+
+        nodeEnter.append("svg:circle")
+            .attr("r", 1e-6)
+            .attr("y", "50");
+  
+        // text place
+         var textspan = nodeEnter.append("svg:text")
+                .attr("dy", ".25em")
+                .attr("text-anchor", "middle");
+         var tspan1 = textspan.append('tspan');
+         var tspan2 = textspan.append('tspan');
+         tspan1.text(function(d) { 
+             var na = Util.getLimitedChar(d.name, 10);
+             if(d.count !='' && d.count !='n'){
+                 var na = na + '('+ d.count + ') ';
+             }
+              return na ; })
+               .attr("dy", function(d) { return (d.amount =='') ? "" : ".07em"; });
+         tspan2.html(function(d) { var tex = d.currencySymbol +  d.amount; return tex ; })
+                .attr("x", "0")
+                .attr("dy", "15");
+        // Transition nodes to their new position.
+        var nodeUpdate = node.transition()
+            .duration(duration)
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        // node circle here
+        nodeUpdate.select("circle")
+            .attr("r",  function(d) {
+                var rval = 30;
+                switch(d.depth){
+                    case 0:
+                        rval = loansObj.lrootr;
+                        break;
+                    case 1:
+                        rval = loansObj.llevel1r;
+                        break;
+                    case 2:
+                    default:
+                        rval = loansObj.llevel2r;
+                                          
+                }
+                return rval;
+            })
+            .attr("class", function(d) {//console.log(d);  
+        return d.sel ? d.colorDefault : d.colorSelected; });
+            //.style("fill", function(d) {console.log(d); return d._children ? "lightsteelblue" : d.colorFill; });
+
+        nodeUpdate.select("text")
+            .style("fill-opacity", 1);
+
+        // Transition exiting nodes to the parent's new position.
+        var nodeExit = node.exit().transition()
+            .duration(duration)
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+            .remove();
+
+        nodeExit.select("circle")
+            .attr("r", 1e-6);
+
+        nodeExit.select("text")
+            .style("fill-opacity", 1e-6);
+
+        // Update the links…
+        var link = loansGroup.selectAll("path.link")
+            .data(ltree.links(nodes), function(d) { return d.target.id; });
+
+        // Enter any new links at the parent's previous position.
+        link.enter().insert("svg:path", "g")
+            .attr("class", "link")
+            .attr("d", function(d) {
+              var o = {x: source.x0, y: source.y0};
+              return ldiagonal({source: o, target: o});
+            })
+          .transition()
+            .duration(duration)
+            .attr("d", ldiagonal);
+
+        // Transition links to their new position.
+        link.transition()
+            .duration(duration)
+            .attr("d", ldiagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link.exit().transition()
+            .duration(duration)
+            .attr("d", function(d) {
+              var o = {x: source.x, y: source.y};
+              return ldiagonal({source: o, target: o});
+            })
+            .remove();
+
+        // Stash the old positions for transition.
+        nodes.forEach(function(d) {
+          d.x0 = d.x;
+          d.y0 = d.y;
+        });
+    }
+    
+    function loansClick(d) {
+        if (d3.event.defaultPrevented) return; // click suppressed
+        // change the color for selected one.
+        if(d.depth!=0){
+            d.sel = true;
+            if(d.depth > 1 && d.parent){
+                d.parent.sel = true
+            }
+        }        
+        d = toggleChildren(d, true);
+        loansUpdate(d);
+        
+        if(d.depth!==0){
+            d.sel = false;           
+            if(d.depth > 1 && d.parent){
+                d.parent.sel = false;
+            }
+        }
+    } 
+    // loans end
     /**********************************************
      * Properties D3 js
      **********************************************/
-
-    function properties(){};
     properties.data = {
         name : "Properties",
         count: 6,
@@ -740,53 +870,35 @@ $( document ).ready(function() {
             }
     ]};
 
-    // properties config
-    var pdiameter = 800;
-
-
-    var pwidth = pdiameter,
-        pheight = pdiameter;
-
-    var pi = 0,
-        proot;
-
     var ptree = d3.layout.tree()
-        .size([360, pheight])
+        .size([360, propertiesObj.pheight])
         .separation(function(a, b) { return (a.parent == b.parent ? 5 : 10) / a.depth; });
 
     var pdiagonal = d3.svg.diagonal.radial()
         .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
 
-
-
-    
-
-
     var propertiesGroup = container.append("g")
-        .attr("transform", "translate("+ propertiesStart +",205)");
+        .attr("transform", "translate("+ propertiesObj.propertiesStart +",205)");
 
    // Define the root
-    proot = properties.data;
-    proot.x0 = pheight / 2;
-    proot.y0 = 0;
+    propertiesObj.proot = properties.data;
+    propertiesObj.proot.x0 = propertiesObj.pheight / 2;
+    propertiesObj.proot.y0 = 0;
     
     // only show first level nodes
-    proot.children.forEach(collapse);
-    
-    // Layout the tree initially and center on the root node.
-    propertiesUpdate(proot);
-    propertiesCenterNode(proot);
+    propertiesObj.proot.children.forEach(collapse);    
+    propertiesUpdate(propertiesObj.proot);
     
     function propertiesUpdate(source) {       
         // Compute the new tree layout.
-        var nodes = ptree.nodes(proot),
+        var nodes = ptree.nodes(propertiesObj.proot),
             links = ptree.links(nodes);
         // Normalize for fixed-depth.
-        nodes.forEach(function(d) { d.y = d.depth * pnodedepth; });
+        nodes.forEach(function(d) { d.y = d.depth * propertiesObj.pnodedepth; });
 
         // Update the nodes…
         var node = propertiesGroup.selectAll("g.node")
-            .data(nodes, function(d) { return d.id || (d.id = ++pi); });
+            .data(nodes, function(d) { return d.id || (d.id = ++propertiesObj.pi); });
         
         // Enter any new nodes at the parent's previous position.
         var nodeEnter = node.enter().append("g")
@@ -809,8 +921,7 @@ $( document ).ready(function() {
  
 
         nodeEnter.append("circle")
-            .attr("r", 1e-6)
-          //  .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
+            .attr("r", 1e-6);
     
         nodeEnter.append("text")
             .attr("x", 10)
@@ -818,7 +929,6 @@ $( document ).ready(function() {
             .attr("text-anchor", "middle")
             .attr("transform", function(d) { return d.x < 180 ? "translate(0)" : "translate(-" + (d.name.length * 8.5)  + ")"; })
             .text(function(d) { 
-                //var nam = wordWrap(d.name, 10);}return nam; 
                 var nap = Util.getLimitedChar(d.name, 10); 
                 if(d.count!='' && d.count!='n'){nap = nap + '(' + d.count+')'};
                 return nap; })
@@ -834,14 +944,14 @@ $( document ).ready(function() {
                 var rval = 30;
                 switch(d.depth){
                     case 0:
-                        rval = prootr;
+                        rval = propertiesObj.prootr;
                         break;
                     case 1:
-                        rval = plevel1r;
+                        rval = propertiesObj.plevel1r;
                         break;
                     case 2:
                     default:
-                        rval = plevel2r;
+                        rval = propertiesObj.plevel2r;
                                           
                 }
                 return rval;
@@ -849,7 +959,6 @@ $( document ).ready(function() {
             .attr("class", function(d) {//console.log(d);  
                             return d.sel ? d.colorSelected : d.colorDefault; 
             });
-          //  .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
     
         nodeUpdate.select("text")
             .style("fill-opacity", 1)
@@ -899,29 +1008,6 @@ $( document ).ready(function() {
         });
     }
 
-    function propertiesCenterNode(source) {
-        // note center node is not implemented for property
-//        console.log()
-//        scale = zoom.scale();
-//        x = -source.x0;
-//        y = -source.y0;
-//         console.log('x val '+ x + 'y val '+y);
-//        x = y * scale + 250;
-//        y = x * scale + 200;
-//        console.log('x val '+ x + 'y val '+y);
-//        propertiesGroup.transition()
-//            .duration(duration)
-//            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
-//        zoom.scale(scale);
-       // zoom.translate([x, y]);
-      
-      // move loans 
-//      // adjust the space between properties and loans
-//       loansGroup.transition()
-//            .duration(duration)
-//            .attr("transform", "translate(" + ((x + 200) > 480 ? (x+480): (x + (480-x)))  + "," + 200 + ")scale(" + scale + ")");      
-    }
-    
     function propertiesClick(d) {
         if (d3.event.defaultPrevented) return; // click suppressed
         
@@ -932,9 +1018,8 @@ $( document ).ready(function() {
             }
         }
         
-        d = toggleChildren(d);
+        d = toggleChildren(d, false);
         propertiesUpdate(d);
-        propertiesCenterNode(d);
 
         if(d.depth!=0){
             d.sel = false;           
@@ -943,360 +1028,14 @@ $( document ).ready(function() {
             }
         } 
     }    
-
-    /**********************************************
-     * Loans D3 js
-     **********************************************/
-    function loans(){}
-    
-    loans.data = {
-        name : "Loans",
-        count: 6,
-        currencySymbol: "",
-        amount: "",
-        colorDefault: "loansDefault",
-        colorSelected: "loansSelected",
-        sel: true,
-        children : [
-            {
-                name : "Antony Parc Office",
-                count: "n",
-                currencySymbol: "$",
-                amount: "80.1M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false,
-                children : [
-                    {
-                        name : "B",
-                        count: "n",
-                        currencySymbol: "$",
-                        amount: "80.1M",
-                        colorDefault: "sun-juniorDefault",
-                        colorSelected: "sun-juniorSelected",                         
-                        sel: false
-                    }]
-            },
-            {
-                name : "Aprirose Retail Portfolio",
-                count: "n",
-                currencySymbol: "$",
-                amount: "28.9M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false
-            },
-            {
-                name : "Eurocastle Portfolio",
-                count: "n",
-                currencySymbol: "$",
-                amount: "199.6M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false,
-                children : [
-                    {
-                        name : "B",
-                        count: "n",
-                        currencySymbol: "$",
-                        amount: "2.6M",
-                        colorDefault: "sun-juniorDefault",
-                        colorSelected: "sun-juniorSelected",
-                        sel: false
-                    }]            
-            },
-            {
-                name : "Metropolis Centre",
-                count: "n",
-                currencySymbol: "$",
-                amount: "59.3M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false,                
-            },
-            {
-                name : "Nextra Portfolio Italy",
-                count: "n",
-                currencySymbol: "$",
-                amount: "81.1M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false
-            },
-            {
-                name : "Orazio Portfolio",
-                count: "n",
-                currencySymbol: "$",
-                amount: "100M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false,
-                children : [
-                    {
-                        name : "B",
-                        count: "n",
-                        currencySymbol: "$",
-                        amount: "206.3M",
-                        colorDefault: "sun-juniorDefault",
-                        colorSelected: "sun-juniorSelected", 
-                        sel: false,
-                        children : [
-                            {
-                                name : "C",
-                                count: "n",
-                                currencySymbol: "$",
-                                amount: "2144.1M",
-                                colorDefault: "sun-juniorDefault",
-                                colorSelected: "sun-juniorSelected",                                  
-                                sel: false
-                            }] 
-                    }]
-            }
-    ]};
-
-    var lmargin = {top: 250, right: 20, bottom: 20, left: 260},
-            lwidth = 560 - lmargin.right - lmargin.left,
-            lheight = 700 - lmargin.top - lmargin.bottom;
-            
-    var li = 0;
-    var lroot;
-
-        
-
-
-    
-    var ltree = d3.layout.tree()
-        .nodeSize([lnodesizex, lnodesizey]);
-
-
-    var ldiagonal = d3.svg.diagonal()
-            .projection(function(d) { return [d.x, d.y]; });
-
-    
-    var loansGroup = container.append("g")
-                               .attr("transform", "translate("+ loansStart +",205)");     
-    
-    lroot = loans.data;
-    lroot.x0 = lheight / 2;
-    lroot.y0 = 0;
-    // display only first level
-    lroot.children.forEach(collapse);
-    
-    loansUpdate(lroot); 
-    loansCenterNode(lroot);
-    
-    function loansUpdate(source) {
-        // Compute the new tree layout.
-        var nodes = ltree.nodes(lroot).reverse();
-        var links = ltree.links(nodes);
-
-        // Normalize for fixed-depth. - parent to child
-        nodes.forEach(function(d) { d.y = d.depth * lnodedepth; });
-
-        // Update the nodes…
-        var node = loansGroup.selectAll("g.node")
-            .data(nodes, function(d) { return d.id || (d.id = ++li); });
-
-        // Enter any new nodes at the parent's previous position.
-        var nodeEnter = node.enter().append("svg:g")
-            .attr("class", "node")
-            .attr("transform", function(d) { return "translate(" + d.x + "," + (d.y + 10) + ")"; })
-            .on("mouseover", function(d) {
-                tooltip.transition()        
-                        .duration(200)
-                        .style("opacity", .9);      
-                tooltip.html(d.name + "<br/>"  + ( (d.amount)? (' ( '+ d.currencySymbol +  d.amount +' )') :"") )
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("width", "150px") 
-                        .style("top", (d3.event.pageY - 45) + "px");
-            })                  
-            .on("mouseout", function(d) {       
-                tooltip.transition()        
-                        .duration(500)
-                        .style("opacity", 0);   
-            })
-            .on("click", loansClick);
-
-        nodeEnter.append("svg:circle")
-            .attr("r", 1e-6)
-            .attr("y", "50");
-         //   .style("fill", function(d) { return d._children ? "lightsteelblue" : d.colorFill; });
-  
-        // text place
-         var textspan = nodeEnter.append("svg:text")
-                .attr("dy", ".25em")
-                .attr("text-anchor", "middle");
-         var tspan1 = textspan.append('tspan');
-         var tspan2 = textspan.append('tspan');
-         tspan1.text(function(d) { 
-             var na = Util.wordWrap(d.name, 10);
-             if(d.count !='' && d.count !='n'){
-                 var na = na + '('+ d.count + ') ';
-             }
-              return na ; })
-               .attr("dy", function(d) { return (d.amount =='') ? "" : ".07em"; });
-         tspan2.text(function(d) { var tex = d.currencySymbol +  d.amount; return tex ; })
-                .attr("x", "0")
-                .attr("dy", "20");
-        // Transition nodes to their new position.
-        var nodeUpdate = node.transition()
-            .duration(duration)
-            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-        // node circle here
-        nodeUpdate.select("circle")
-            .attr("r",  function(d) {
-                var rval = 30;
-                switch(d.depth){
-                    case 0:
-                        rval = lrootr;
-                        break;
-                    case 1:
-                        rval = llevel1r;
-                        break;
-                    case 2:
-                    default:
-                        rval = llevel2r;
-                                          
-                }
-                return rval;
-            })
-            .attr("class", function(d) {//console.log(d);  
-        return d.sel ? d.colorDefault : d.colorSelected; });
-            //.style("fill", function(d) {console.log(d); return d._children ? "lightsteelblue" : d.colorFill; });
-
-        nodeUpdate.select("text")
-            .style("fill-opacity", 1);
-
-        // Transition exiting nodes to the parent's new position.
-        var nodeExit = node.exit().transition()
-            .duration(duration)
-            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-            .remove();
-
-        nodeExit.select("circle")
-            .attr("r", 1e-6);
-
-        nodeExit.select("text")
-            .style("fill-opacity", 1e-6);
-
-        // Update the links…
-        var link = loansGroup.selectAll("path.link")
-            .data(ltree.links(nodes), function(d) { return d.target.id; });
-
-        // Enter any new links at the parent's previous position.
-        link.enter().insert("svg:path", "g")
-            .attr("class", "link")
-            .attr("d", function(d) {
-              var o = {x: source.x0, y: source.y0};
-              return ldiagonal({source: o, target: o});
-            })
-          .transition()
-            .duration(duration)
-            .attr("d", ldiagonal);
-
-        // Transition links to their new position.
-        link.transition()
-            .duration(duration)
-            .attr("d", ldiagonal);
-
-        // Transition exiting nodes to the parent's new position.
-        link.exit().transition()
-            .duration(duration)
-            .attr("d", function(d) {
-              var o = {x: source.x, y: source.y};
-              return ldiagonal({source: o, target: o});
-            })
-            .remove();
-
-        // Stash the old positions for transition.
-        nodes.forEach(function(d) {
-          d.x0 = d.x;
-          d.y0 = d.y;
-        });
-    }
-    
-    function loansCenterNode(source) {
-//        scale = zoom.scale();
-//        x = -source.x0;
-//        y = -source.y0;
-//        x = x * scale + 650;
-//        y = y * scale + 200;
-//        loansGroup.transition()
-//            .duration(duration)
-//            .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
-//        zoom.scale(scale);
-//
-//        // adjust the space between loans and properties
-//        propertiesGroup.transition()
-//            .duration(duration)
-//            //.attr("transform", "translate(" + (x - 300)  + "," + 200 + ")scale(" + scale + ")");
-//            .attr("transform", function(d) {
-//                var newxval = 200;
-//                if(x < 650){
-//                    newxval = 650 - x;
-//                    newxval = 200 - newxval;
-//                }
-//                return "translate(" + newxval  + "," + 200 + ")scale(" + scale + ")";
-//            });
-//            
-//      // adjust the space between loans and deals
-//       dealsGroup.transition()
-//            .duration(duration)
-//            .attr("transform", function(d) {
-//                var newxval = 950;
-//                if(x > 650){
-//                    newxval = x + 370;
-//                    
-//                }
-//                return "translate(" + newxval  + "," + -15 + ")scale(" + scale + ")";
-//            });
-    }
-
-    function loansClick(d) {
-        // change the color for selected one.
-      //  console.log("d here " +d);
-        if(d.depth!=0){
-            d.sel = true;
-            if(d.depth > 1 && d.parent){
-                d.parent.sel = true
-            }
-        }
-       
-        if (d3.event.defaultPrevented) return; // click suppressed
-        d = toggleChildren(d);
-        loansUpdate(d);
-        loansCenterNode(d);
-        
-        if(d.depth!==0){
-            d.sel = false;           
-            if(d.depth > 1 && d.parent){
-                d.parent.sel = false;
-            }
-        }
-        
-        
-    } 
-
-    
         
 function zoomed() {
   container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 
-
-
-
-
-
-
-    
 $(window).resize(function(){
     location.reload();
-//  windowwidth = $( window ).width();
-//  console.log('resize calling');
-//  propertiesUpdate(proot);
-//  loansUpdate(lroot);
-//  dealsUpdate(droot);
+
 });
  // document ready end   
 });
