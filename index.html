@@ -354,6 +354,7 @@ $( document ).ready(function() {
                         return '';
                     })
                 .attr("x", "0")
+                .style("color", "blueviolet")
                 .attr("dy", "15");
 
         // Update the text to reflect whether node has children or not.
@@ -467,7 +468,6 @@ $( document ).ready(function() {
     /**********************************************
      * Loans D3 js
      **********************************************/
-    
     loans.data = {
         name : "Loans",
         count: 6,
@@ -741,7 +741,8 @@ $( document ).ready(function() {
     /**********************************************
      * Properties D3 js
      **********************************************/
-    properties.data = {
+properties.data = {
+    
         name : "Properties",
         count: 6,
         colorDefault: "propertiesDefault",
@@ -869,9 +870,22 @@ $( document ).ready(function() {
                     }]
             }
     ]};
-
+    console.log( properties.data.children.length);
+    // get the angles for properties tree
+    var ptreeAngle = 360;
+    
+    if(properties.data.children.length == 1){
+        ptreeAngle = 90;
+    }else if(properties.data.children.length == 2){
+        ptreeAngle = -180;
+    }else if(properties.data.children.length == 3){
+        ptreeAngle = -180;
+        propertiesObj.pnodedepth = 100;
+    }else if(properties.data.children.length == 4){
+        ptreeAngle = 360;
+    }
     var ptree = d3.layout.tree()
-        .size([360, propertiesObj.pheight])
+        .size([ptreeAngle, propertiesObj.pheight])
         .separation(function(a, b) { return (a.parent == b.parent ? 5 : 10) / a.depth; });
 
     var pdiagonal = d3.svg.diagonal.radial()
@@ -1028,7 +1042,7 @@ $( document ).ready(function() {
             }
         } 
     }    
-        
+    
 function zoomed() {
   container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
@@ -1039,7 +1053,6 @@ $(window).resize(function(){
 });
  // document ready end   
 });
-
 
 
 </script>
