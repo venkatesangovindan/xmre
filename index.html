@@ -736,152 +736,259 @@ $( document ).ready(function() {
                 d.parent.sel = false;
             }
         }
+        
+        // update the property based on the loans
+        if(propertiesObj){
+            console.log('calling here')
+           
+             var loadid = 1;
+             updatePropertiesByLoan();
+        }
+        
     } 
+    
+    function updatePropertiesByLoan(loanid){
+         // update 
+             propertiesObj.proot = properties.data.lp[1];
+             propertiesObj.proot.children.forEach(collapse);    
+             propertiesUpdate(propertiesObj.proot);
+    }
     // loans end
     /**********************************************
      * Properties D3 js
      **********************************************/
-properties.data = {
-    
-        name : "Properties",
-        count: 6,
-        colorDefault: "propertiesDefault",
-        colorSelected: "propertiesSelected",
-        sel: true,
-        plusSign: false,
-        children : [
+    properties.data = {
+        lp:[
             {
-                name : "Bayreuth, 6",
-                count: "n",           
-                plusSign: true,
-                colorDefault: "properties-singleDefault",
-                colorSelected: "properties-singleSelected",
-                sel: false,                
+                name : "Properties",
+                count: 6,
+                colorDefault: "propertiesDefault",
+                colorSelected: "propertiesSelected",
+                sel: true,
+                plusSign: false,
                 children : [
                     {
-                        name : "Sponsor",
-                        count: "",
-                        colorDefault: "sponsorDefault",
-                        colorSelected: "sponsorSelected",
-                        sel: false,
-                        plusSign: false
+                        name : "Bayreuth, 6",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
                     },{
-                        name : "Tenant",
-                        count: "",
-                        colorDefault: "tenantDefault",
-                        colorSelected: "tenantSelected",
-                        sel: false, 
-                        plusSign: false
-                    }]
-            },{
-                name : "Lichtenfels, Mainau 16",
-                count: "n",           
-                plusSign: true,
-                colorDefault: "properties-singleDefault",
-                colorSelected: "properties-singleSelected",
-                sel: false,                  
+                        name : "Lichtenfels, Mainau 16",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                  
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
+                    },
+                    {
+                        name : "Munchberg",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                  
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false,                         
+                                plusSign: false
+                            }]
+                    },
+                    {
+                        name : "Munnerstadt",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                 
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false,                         
+                                plusSign: false
+                            }]
+                    },
+                    {
+                        name : "Beckum",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false,                        
+                                plusSign: false
+                            }]
+                    }
+                ]
+            },            {
+                name : "Properties",
+                count: 6,
+                colorDefault: "propertiesDefault",
+                colorSelected: "propertiesSelected",
+                sel: true,
+                plusSign: false,
                 children : [
                     {
-                        name : "Sponsor",
-                        count: "",
-                        colorDefault: "sponsorDefault",
-                        colorSelected: "sponsorSelected",
-                        sel: false,                        
-                        plusSign: false
+                        name : "Bayreuth, 6",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
                     },{
-                        name : "Tenant",
-                        count: "",
-                        colorDefault: "tenantDefault",
-                        colorSelected: "tenantSelected",
-                        sel: false, 
-                        plusSign: false
-                    }]
-            },
-            {
-                name : "Munchberg",
-                count: "n",           
-                plusSign: true,
-                colorDefault: "properties-singleDefault",
-                colorSelected: "properties-singleSelected",
-                sel: false,                  
-                children : [
+                        name : "Lichtenfels, Mainau 16",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                  
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
+                    },
                     {
-                        name : "Sponsor",
-                        count: "",
-                        colorDefault: "sponsorDefault",
-                        colorSelected: "sponsorSelected",
-                        sel: false,                        
-                        plusSign: false
-                    },{
-                        name : "Tenant",
-                        count: "",
-                        colorDefault: "tenantDefault",
-                        colorSelected: "tenantSelected",
-                        sel: false,                         
-                        plusSign: false
-                    }]
-            },
-            {
-                name : "Munnerstadt",
-                count: "n",           
-                plusSign: true,
-                colorDefault: "properties-singleDefault",
-                colorSelected: "properties-singleSelected",
-                sel: false,                 
-                children : [
-                    {
-                        name : "Sponsor",
-                        count: "",
-                        colorDefault: "sponsorDefault",
-                        colorSelected: "sponsorSelected",
-                        sel: false,                        
-                        plusSign: false
-                    },{
-                        name : "Tenant",
-                        count: "",
-                        colorDefault: "tenantDefault",
-                        colorSelected: "tenantSelected",
-                        sel: false,                         
-                        plusSign: false
-                    }]
-            },
-            {
-                name : "Beckum",
-                count: "n",           
-                plusSign: true,
-                colorDefault: "properties-singleDefault",
-                colorSelected: "properties-singleSelected",
-                sel: false,                
-                children : [
-                    {
-                        name : "Sponsor",
-                        count: "",
-                        colorDefault: "sponsorDefault",
-                        colorSelected: "sponsorSelected",
-                        sel: false,                        
-                        plusSign: false
-                    },{
-                        name : "Tenant",
-                        count: "",
-                        colorDefault: "tenantDefault",
-                        colorSelected: "tenantSelected",
-                        sel: false,                        
-                        plusSign: false
-                    }]
+                        name : "Beckum",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false,                        
+                                plusSign: false
+                            }]
+                    }
+                ]
             }
-    ]};
-    console.log( properties.data.children.length);
+        ]
+       };
+    console.log( properties.data.lp[0]);
+    
+    
+   // Define the root
+    propertiesObj.proot = properties.data.lp[0];
+    propertiesObj.proot.x0 = propertiesObj.pheight / 2;
+    propertiesObj.proot.y0 = 0;
+    
     // get the angles for properties tree
     var ptreeAngle = 360;
     
-    if(properties.data.children.length == 1){
+    if(propertiesObj.proot.children.length == 1){
         ptreeAngle = 90;
-    }else if(properties.data.children.length == 2){
+    }else if(propertiesObj.proot.children.length == 2){
         ptreeAngle = -180;
-    }else if(properties.data.children.length == 3){
+    }else if(propertiesObj.proot.children.length == 3){
         ptreeAngle = -180;
         propertiesObj.pnodedepth = 100;
-    }else if(properties.data.children.length == 4){
+    }else if(propertiesObj.proot.children.length == 4){
         ptreeAngle = 360;
     }
     var ptree = d3.layout.tree()
@@ -894,14 +1001,8 @@ properties.data = {
     var propertiesGroup = container.append("g")
         .attr("transform", "translate("+ propertiesObj.propertiesStart +",205)");
 
-   // Define the root
-    propertiesObj.proot = properties.data;
-    propertiesObj.proot.x0 = propertiesObj.pheight / 2;
-    propertiesObj.proot.y0 = 0;
     
-    // only show first level nodes
-    propertiesObj.proot.children.forEach(collapse);    
-    propertiesUpdate(propertiesObj.proot);
+
     
     function propertiesUpdate(source) {       
         // Compute the new tree layout.
@@ -988,19 +1089,27 @@ properties.data = {
 
         nodeExit.select("text")
             .style("fill-opacity", 1e-6);
-
+    
         // Update the links…
         var link = propertiesGroup.selectAll("path.link")
-            .data(links, function(d) { return d.target.id; });
+            .data(ptree.links(nodes), function(d) { return d.target.id; });        
 
         // Enter any new links at the parent's previous position.
-        link.enter().insert("path", "g")
+        link.enter().insert("svg:path", "g")
             .attr("class", "link")
             .attr("d", function(d) {
+                if(typeof source.x0 === "undefined" ){
+                    source.x0 = 400;
+                }
+                if(typeof source.y0 === "undefined" ){
+                    source.y0 = 0;
+                }                
               var o = {x: source.x0, y: source.y0};
-              return pdiagonal({source: o, target: o});
-            });
-
+              return ldiagonal({source: o, target: o});
+            })
+          .transition()
+            .duration(duration)
+            .attr("d", ldiagonal);
         // Transition links to their new position.
         link.transition()
             .duration(duration)
@@ -1041,7 +1150,11 @@ properties.data = {
                 d.parent.sel = false;
             }
         } 
-    }    
+    }
+        // only show first level nodes
+    propertiesObj.proot.children.forEach(collapse);    
+    propertiesUpdate(propertiesObj.proot);
+
     
 function zoomed() {
   container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
