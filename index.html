@@ -594,8 +594,19 @@ $( document ).ready(function() {
     loansObj.lroot.x0 = loansObj.lheight / 2;
     loansObj.lroot.y0 = 0;
     // display only first level
-    loansObj.lroot.children.forEach(collapse);    
+    loansObj.lroot.children.forEach(collapse); 
+    
+    // select the first loan
+    if(loansObj.lroot.children.length > 1){
+        loansObj.lroot.children[0].sel = true;
+    }    
     loansUpdate(loansObj.lroot); 
+    
+    // after the svg update, reset it     
+    if(loansObj.lroot.children.length > 1){
+        loansObj.lroot.children[0].sel = false;
+    }      
+
     
     function loansUpdate(source) {
         // Compute the new tree layout.
@@ -745,6 +756,7 @@ $( document ).ready(function() {
         
         // update the property based on the loans
         if(propertiesObj){
+           // console.log(d.lid);
             if(typeof d.lid == 'undefined'){
                 return false;
             }
@@ -753,16 +765,13 @@ $( document ).ready(function() {
             if(d.lid > 0){
                 loadid = d.lid - 1;
             }
-
+            
             updatePropertiesByLoan(loadid);
         }
         
     } 
     
     function updatePropertiesByLoan(loanid){
-        if(!loanid){
-            return false;
-        }
          // update 
         propertiesObj.proot = properties.data.lp[loanid];
         propertiesObj.proot.children.forEach(collapse); 
