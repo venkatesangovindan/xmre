@@ -120,5 +120,15 @@ path.link {
     stroke: #ccc;
 }
 
-
-
+.propertiesSelected ~ text {
+    fill: #ffffff;
+}
+.properties-singleSelected ~ text {
+    fill: #ffffff;
+}
+.dealsSelected ~ text {
+    fill: #ffffff;
+}
+.tranchesSelected ~ text {
+    fill: #ffffff;
+}
