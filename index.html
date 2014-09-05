@@ -162,7 +162,9 @@ $( document ).ready(function() {
     
     properties.prototype.pi = 0;    
     properties.prototype.maxDisplayChar = 10;
-    properties.prototype.proot = '';
+    properties.prototype.proot = ''; 
+    
+    properties.prototype.ptreeAngle = 360; 
 
     var propertiesObj = new properties();
         // for responsive
@@ -379,7 +381,7 @@ $( document ).ready(function() {
                 }
                 return rval;
             })
-            .attr("class", function(d) {//console.log(d);  
+            .attr("class", function(d) {
                             return d.sel ? d.colorSelected : d.colorDefault; 
             });
 
@@ -469,6 +471,7 @@ $( document ).ready(function() {
      * Loans D3 js
      **********************************************/
     loans.data = {
+        lid: 0,
         name : "Loans",
         count: 6,
         currencySymbol: "",
@@ -478,6 +481,7 @@ $( document ).ready(function() {
         sel: true,
         children : [
             {
+                lid: 1,
                 name : "Antony Parc Office",
                 count: "n",
                 currencySymbol: "&pound;",
@@ -497,6 +501,7 @@ $( document ).ready(function() {
                     }]
             },
             {
+                lid: 2,
                 name : "Aprirose Retail Portfolio",
                 count: "n",
                 currencySymbol: "&pound;",
@@ -506,7 +511,8 @@ $( document ).ready(function() {
                 sel: false
             },
             {
-                name : "Eurocastle Portfolio",
+                lid: 3,
+                name : "Eurocastle Retail D Portfolio",
                 count: "n",
                 currencySymbol: "&pound;",
                 amount: "199.6M",
@@ -525,7 +531,8 @@ $( document ).ready(function() {
                     }]            
             },
             {
-                name : "Metropolis Centre",
+                lid: 4,
+                name : "Metropolis Shopping Centre",
                 count: "n",
                 currencySymbol: "&pound;",
                 amount: "59.3M",
@@ -534,6 +541,7 @@ $( document ).ready(function() {
                 sel: false,                
             },
             {
+                lid: 5,
                 name : "Nextra Portfolio Italy",
                 count: "n",
                 currencySymbol: "&pound;",
@@ -543,6 +551,7 @@ $( document ).ready(function() {
                 sel: false
             },
             {
+                lid: 6,
                 name : "Orazio Portfolio",
                 count: "n",
                 currencySymbol: "&pound;",
@@ -663,9 +672,7 @@ $( document ).ready(function() {
                 }
                 return rval;
             })
-            .attr("class", function(d) {//console.log(d);  
-        return d.sel ? d.colorDefault : d.colorSelected; });
-            //.style("fill", function(d) {console.log(d); return d._children ? "lightsteelblue" : d.colorFill; });
+            .attr("class", function(d) {  return d.sel ? d.colorDefault : d.colorSelected; });
 
         nodeUpdate.select("text")
             .style("fill-opacity", 1);
@@ -739,19 +746,29 @@ $( document ).ready(function() {
         
         // update the property based on the loans
         if(propertiesObj){
-            console.log('calling here')
-           
-             var loadid = 1;
-             updatePropertiesByLoan();
+            if(typeof d.lid == 'undefined'){
+                return false;
+            }
+            
+            var loadid = 0;
+            if(d.lid > 0){
+                loadid = d.lid - 1;
+            }
+
+            updatePropertiesByLoan(loadid);
         }
         
     } 
     
     function updatePropertiesByLoan(loanid){
+        if(!loanid){
+            return false;
+        }
          // update 
-             propertiesObj.proot = properties.data.lp[1];
-             propertiesObj.proot.children.forEach(collapse);    
-             propertiesUpdate(propertiesObj.proot);
+        propertiesObj.proot = properties.data.lp[loanid];
+        propertiesObj.proot.children.forEach(collapse); 
+        updatePtreeAngle();
+        propertiesUpdate(propertiesObj.proot);
     }
     // loans end
     /**********************************************
@@ -761,14 +778,48 @@ $( document ).ready(function() {
         lp:[
             {
                 name : "Properties",
-                count: 6,
+                count: 1,
                 colorDefault: "propertiesDefault",
                 colorSelected: "propertiesSelected",
                 sel: true,
                 plusSign: false,
                 children : [
                     {
-                        name : "Bayreuth, 6",
+                        name : "Antony Parc",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
+                    }
+                ]
+            },
+            {
+                name : "Properties",
+                count: 4,
+                colorDefault: "propertiesDefault",
+                colorSelected: "propertiesSelected",
+                sel: true,
+                plusSign: false,
+                children : [
+                    {
+                        name : ": Bayreuth, Leibnitzstr. 6",
                         count: "n",           
                         plusSign: true,
                         colorDefault: "properties-singleDefault",
@@ -815,7 +866,7 @@ $( document ).ready(function() {
                             }]
                     },
                     {
-                        name : "Munchberg",
+                        name : "Münchberg, Helmbrechtser Str.",
                         count: "n",           
                         plusSign: true,
                         colorDefault: "properties-singleDefault",
@@ -839,7 +890,112 @@ $( document ).ready(function() {
                             }]
                     },
                     {
-                        name : "Munnerstadt",
+                        name : "Schleiz, Oettersdorfer Str.",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                 
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false,                         
+                                plusSign: false
+                            }]
+                    }               
+                ]
+            },
+            {
+                name : "Properties",
+                count: 5,
+                colorDefault: "propertiesDefault",
+                colorSelected: "propertiesSelected",
+                sel: true,
+                plusSign: false,
+                children : [
+                    {
+                        name : "Münnerstadt",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
+                    },{
+                        name : "Beckum",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                  
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
+                    },
+                    {
+                        name : "Bockenem",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                  
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false,                         
+                                plusSign: false
+                            }]
+                    },
+                    {
+                        name : "Celle",
                         count: "n",           
                         plusSign: true,
                         colorDefault: "properties-singleDefault",
@@ -863,7 +1019,7 @@ $( document ).ready(function() {
                             }]
                     },
                     {
-                        name : "Beckum",
+                        name : "Eisenach",
                         count: "n",           
                         plusSign: true,
                         colorDefault: "properties-singleDefault",
@@ -885,18 +1041,53 @@ $( document ).ready(function() {
                                 sel: false,                        
                                 plusSign: false
                             }]
-                    }
+                    }                    
                 ]
-            },            {
+            },
+            {
                 name : "Properties",
-                count: 6,
+                count: 1,
                 colorDefault: "propertiesDefault",
                 colorSelected: "propertiesSelected",
                 sel: true,
                 plusSign: false,
                 children : [
                     {
-                        name : "Bayreuth, 6",
+                        name : "Metropolis Shoppping Center",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
+                    }
+                ]
+            },
+            {
+                name : "Properties",
+                count: 3,
+                colorDefault: "propertiesDefault",
+                colorSelected: "propertiesSelected",
+                sel: true,
+                plusSign: false,
+                children : [
+                    {
+                        name : "Cesano Boscone, V. R. Sanzio",
                         count: "n",           
                         plusSign: true,
                         colorDefault: "properties-singleDefault",
@@ -919,7 +1110,7 @@ $( document ).ready(function() {
                                 plusSign: false
                             }]
                     },{
-                        name : "Lichtenfels, Mainau 16",
+                        name : "Rozzano (MI) Milanofiori",
                         count: "n",           
                         plusSign: true,
                         colorDefault: "properties-singleDefault",
@@ -943,12 +1134,12 @@ $( document ).ready(function() {
                             }]
                     },
                     {
-                        name : "Beckum",
+                        name : "Milano, V. Gadames 7/57",
                         count: "n",           
                         plusSign: true,
                         colorDefault: "properties-singleDefault",
                         colorSelected: "properties-singleSelected",
-                        sel: false,                
+                        sel: false,                  
                         children : [
                             {
                                 name : "Sponsor",
@@ -962,15 +1153,96 @@ $( document ).ready(function() {
                                 count: "",
                                 colorDefault: "tenantDefault",
                                 colorSelected: "tenantSelected",
-                                sel: false,                        
+                                sel: false,                         
                                 plusSign: false
                             }]
-                    }
+                    }          
+                ]
+            },            
+            {
+                name : "Properties",
+                count: 3,
+                colorDefault: "propertiesDefault",
+                colorSelected: "propertiesSelected",
+                sel: true,
+                plusSign: false,
+                children : [
+                    {
+                        name : "Penny BI",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
+                    },{
+                        name : "Penny Cremona",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                  
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false, 
+                                plusSign: false
+                            }]
+                    },
+                    {
+                        name : "Penny MS",
+                        count: "n",           
+                        plusSign: true,
+                        colorDefault: "properties-singleDefault",
+                        colorSelected: "properties-singleSelected",
+                        sel: false,                  
+                        children : [
+                            {
+                                name : "Sponsor",
+                                count: "",
+                                colorDefault: "sponsorDefault",
+                                colorSelected: "sponsorSelected",
+                                sel: false,                        
+                                plusSign: false
+                            },{
+                                name : "Tenant",
+                                count: "",
+                                colorDefault: "tenantDefault",
+                                colorSelected: "tenantSelected",
+                                sel: false,                         
+                                plusSign: false
+                            }]
+                    }                    
                 ]
             }
         ]
        };
-    console.log( properties.data.lp[0]);
+    //console.log( properties.data.lp[0]);
     
     
    // Define the root
@@ -979,21 +1251,25 @@ $( document ).ready(function() {
     propertiesObj.proot.y0 = 0;
     
     // get the angles for properties tree
-    var ptreeAngle = 360;
+   // var ptreeAngle = 360;
     
-    if(propertiesObj.proot.children.length == 1){
-        ptreeAngle = 90;
-    }else if(propertiesObj.proot.children.length == 2){
-        ptreeAngle = -180;
-    }else if(propertiesObj.proot.children.length == 3){
-        ptreeAngle = -180;
-        propertiesObj.pnodedepth = 100;
-    }else if(propertiesObj.proot.children.length == 4){
-        ptreeAngle = 360;
+
+    
+    function updatePtreeAngle(){
+        if(propertiesObj.proot.children.length == 1){
+            propertiesObj.ptreeAngle = -150;
+           // propertiesObj.pnodedepth = 100;
+        }else if(propertiesObj.proot.children.length == 2){
+            propertiesObj.ptreeAngle = -180;
+        }else if(propertiesObj.proot.children.length == 3){
+            propertiesObj.ptreeAngle = -180;
+        }else if(propertiesObj.proot.children.length >= 4){
+            propertiesObj.ptreeAngle = 360;
+        } 
     }
-    var ptree = d3.layout.tree()
-        .size([ptreeAngle, propertiesObj.pheight])
-        .separation(function(a, b) { return (a.parent == b.parent ? 5 : 10) / a.depth; });
+    
+    updatePtreeAngle();
+
 
     var pdiagonal = d3.svg.diagonal.radial()
         .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
@@ -1004,12 +1280,21 @@ $( document ).ready(function() {
     
 
     
-    function propertiesUpdate(source) {       
+    function propertiesUpdate(source) {
+        
+      var ptree = d3.layout.tree()
+        .size([propertiesObj.ptreeAngle, propertiesObj.pheight])
+        .separation(function(a, b) { return (a.parent == b.parent ? 5 : 10) / a.depth; });
+
         // Compute the new tree layout.
         var nodes = ptree.nodes(propertiesObj.proot),
             links = ptree.links(nodes);
         // Normalize for fixed-depth.
-        nodes.forEach(function(d) { d.y = d.depth * propertiesObj.pnodedepth; });
+        nodes.forEach(function(d) { d.y = d.depth * propertiesObj.pnodedepth;
+            if(isNaN(d.x)){
+                d.x = d.depth * 270;
+            }
+        });
 
         // Update the nodes…
         var node = propertiesGroup.selectAll("g.node")
@@ -1018,7 +1303,9 @@ $( document ).ready(function() {
         // Enter any new nodes at the parent's previous position.
         var nodeEnter = node.enter().append("g")
             .attr("class", "node")
-            .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+            .attr("transform", function(d) { 
+                return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")";
+            })
             .on("mouseover", function(d) {
                 tooltip.transition()        
                         .duration(200)
@@ -1052,7 +1339,10 @@ $( document ).ready(function() {
        // Transition nodes to their new position.
        var nodeUpdate = node.transition()
             .duration(duration)
-            .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+            .attr("transform", function(d) { 
+                return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; 
+               // return ""; 
+            })
 
         nodeUpdate.select("circle")
             .attr("r", function(d) {
@@ -1071,13 +1361,14 @@ $( document ).ready(function() {
                 }
                 return rval;
             })
-            .attr("class", function(d) {//console.log(d);  
-                            return d.sel ? d.colorSelected : d.colorDefault; 
-            });
+            .attr("class", function(d) { return d.sel ? d.colorSelected : d.colorDefault; });
     
         nodeUpdate.select("text")
             .style("fill-opacity", 1)
-            .attr("transform", function(d) { return  "rotate("+ ( -d.x + 90 )+ ")translate(-" + 10  + ")"; });
+            .attr("transform", function(d) { 
+                return  "rotate("+ ( -d.x + 90 )+ ")translate(-" + 10  + ")"; 
+               // return  "translate(-" + 10  + ")"; 
+            });
             
         var nodeExit = node.exit().transition()
             .duration(duration)
