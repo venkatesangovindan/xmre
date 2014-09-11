@@ -23,6 +23,134 @@
 
 <script>
 $( document ).ready(function() {
+    
+    var dealData = {};
+    var loanData = {};
+    var propertiesData = {};
+    
+    /*************************
+     * Get the data through ajax call.
+     *************************/
+    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetDealForSocialGraph?DealID=65358", function(error, serverData) {
+        if(serverData){
+            dealData = serverData;
+            
+            // adjust the data
+            dealData.currencySymbol = "&pound;";
+            dealData.colorDefault = "dealsDefault";
+            dealData.colorSelected = "dealsSelected";
+            dealData.sel = true;
+            
+            if(dealData.children.length > 6){ // only show 6 tranches now - it can be change
+                dealData.children = dealData.children.slice(0, 6);
+            }
+            
+            $.each( dealData.children, function( key, childObj ) {
+                childObj.currencySymbol = "&pound;";
+                childObj.colorDefault = "tranchesDefault";
+                childObj.colorSelected = "tranchesSelected";
+                childObj.sel = false;
+            });
+            
+            
+            renderDeal();
+        }
+     
+       
+    });
+
+    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetLoanForSocialGraphByDealID?DealID=65647", function(error, serverData) {
+            if(serverData){
+                loanData = serverData;
+                   console.log()
+                // adjust the data
+                loanData.currencySymbol = "&pound;";
+                loanData.colorDefault = "loansDefault";
+                loanData.colorSelected = "loansSelected";
+                loanData.sel = true;
+
+                if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
+                    loanData.children = loanData.children.slice(0, 8);
+                }
+                
+                if(loanData.children){
+                    loanData.count = loanData.children.length;
+                    $.each( loanData.children, function( key, childObj ) {
+                        childObj.currencySymbol = "&pound;";
+                        childObj.colorDefault = "b-loansDefault";
+                        childObj.colorSelected = "b-loansSelected";
+                        childObj.sel = false;
+                        
+                        // check sub loans
+                        if(childObj.children){
+                            childObj.children = subloans(childObj.children);
+                        }
+                    });
+                }
+
+
+
+
+                renderLoan();
+            }
+     
+       
+    });
+
+        
+    
+    function subloans(obj){
+        $.each( obj, function( key, cObj ) {
+            cObj.currencySymbol = "&pound;";
+            cObj.colorDefault = "b-loansDefault";
+            cObj.colorSelected = "b-loansSelected";
+            cObj.sel = false;
+            if(cObj.children){
+                cObj.children = subloans(cObj.children);
+            }
+        });
+        
+        return obj;
+    }
+    
+    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetPropertyForSocialGraphByLoanID?loanId=66221", function(error, serverData) {
+            if(serverData){
+                propertiesData = serverData;
+                  
+                // adjust the data
+                propertiesData.currencySymbol = "&pound;";
+                propertiesData.colorDefault = "loansDefault";
+                propertiesData.colorSelected = "loansSelected";
+                propertiesData.sel = true;
+
+                if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
+                    loanData.children = loanData.children.slice(0, 8);
+                }
+                
+                if(loanData.children){
+                    loanData.count = loanData.children.length;
+                    $.each( loanData.children, function( key, childObj ) {
+                        childObj.currencySymbol = "&pound;";
+                        childObj.colorDefault = "b-loansDefault";
+                        childObj.colorSelected = "b-loansSelected";
+                        childObj.sel = false;
+                        
+                        // check sub loans
+                        if(childObj.children){
+                            childObj.children = subloans(childObj.children);
+                        }
+                    });
+                }
+
+
+
+
+                renderLoan();
+            }
+     
+       
+    });    
+    
         
     /*********************************
      * Common functions and variables - Helper functions for collapsing and expanding nodes.
@@ -215,55 +343,55 @@ $( document ).ready(function() {
      **********************************************/                 
    
 
-    deals.data = {
-        name : "EURO 25X",
-        currencySymbol: "&pound;",
-        amount: "80.1M",
-        colorDefault: "dealsDefault",
-        colorSelected: "dealsSelected",
-        sel: true,        
-        children : [
-            {
-                name : "A",
-                currencySymbol: "&pound;",
-                amount: "821.7M",
-                colorDefault: "tranchesDefault",
-                colorSelected: "tranchesSelected",
-                sel: false                 
-            },
-            {
-                name : "B",
-                currencySymbol: "&pound;",
-                amount: "47.6M", 
-                colorDefault: "tranchesDefault",
-                colorSelected: "tranchesSelected",
-                sel: false                 
-            },
-            {
-                name : "C",
-                currencySymbol: "&pound;",
-                amount: "50M",
-                colorDefault: "tranchesDefault",
-                colorSelected: "tranchesSelected",
-                sel: false                 
-            },
-            {
-                name : "D",
-                currencySymbol: "&pound;",
-                amount: "36.5M",
-                colorDefault: "tranchesDefault",
-                colorSelected: "tranchesSelected",
-                sel: false                 
-            },
-            {
-                name : "E",
-                currencySymbol: "&pound;",
-                amount: "15.8M",
-                colorDefault: "tranchesDefault",
-                colorSelected: "tranchesSelected",
-                sel: false,
-            }
-    ]};
+//    deals.data = {
+//        name : "EURO 25X",
+//        currencySymbol: "&pound;",
+//        amount: "80.1M",
+//        colorDefault: "dealsDefault",
+//        colorSelected: "dealsSelected",
+//        sel: true,        
+//        children : [
+//            {
+//                name : "A",
+//                currencySymbol: "&pound;",
+//                amount: "821.7M",
+//                colorDefault: "tranchesDefault",
+//                colorSelected: "tranchesSelected",
+//                sel: false                 
+//            },
+//            {
+//                name : "B",
+//                currencySymbol: "&pound;",
+//                amount: "47.6M", 
+//                colorDefault: "tranchesDefault",
+//                colorSelected: "tranchesSelected",
+//                sel: false                 
+//            },
+//            {
+//                name : "C",
+//                currencySymbol: "&pound;",
+//                amount: "50M",
+//                colorDefault: "tranchesDefault",
+//                colorSelected: "tranchesSelected",
+//                sel: false                 
+//            },
+//            {
+//                name : "D",
+//                currencySymbol: "&pound;",
+//                amount: "36.5M",
+//                colorDefault: "tranchesDefault",
+//                colorSelected: "tranchesSelected",
+//                sel: false                 
+//            },
+//            {
+//                name : "E",
+//                currencySymbol: "&pound;",
+//                amount: "15.8M",
+//                colorDefault: "tranchesDefault",
+//                colorSelected: "tranchesSelected",
+//                sel: false,
+//            }
+//    ]};
              
 
     var dtree = d3.layout.tree()
@@ -456,130 +584,140 @@ $( document ).ready(function() {
         });
     }
 
-    // Define the root
-    dealsObj.droot = deals.data;
-    dealsObj.droot.x0 = dealsObj.dviewerHeight / 2;
-    dealsObj.droot.y0 = 0;
-    
-    // only show first level nodes
-    dealsObj.droot.children.forEach(collapse);
-    dealsUpdate(dealsObj.droot);
+    function renderDeal(){
+        console.log(' called ');
+        if(dealData && dealData!=''){
+            console.log(' i am here ');
+            //if data present 
+            dealsObj.data = dealData;
+                // Define the root
+            dealsObj.droot = dealsObj.data;
+            dealsObj.droot.x0 = dealsObj.dviewerHeight / 2;
+            dealsObj.droot.y0 = 0;
+
+            // only show first level nodes
+            dealsObj.droot.children.forEach(collapse);
+            dealsUpdate(dealsObj.droot);
+        }
+    }
+
+
 
     // deals over
     /**********************************************
      * Loans D3 js
      **********************************************/
-    loans.data = {
-        lid: 0,
-        name : "Loans",
-        count: 6,
-        currencySymbol: "",
-        amount: "",
-        colorDefault: "loansDefault",
-        colorSelected: "loansSelected",
-        sel: true,
-        children : [
-            {
-                lid: 1,
-                name : "Antony Parc Office",
-                count: "n",
-                currencySymbol: "&pound;",
-                amount: "80.1M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false,
-                children : [
-                    {
-                        name : "B",
-                        count: "n",
-                        currencySymbol: "&pound;",
-                        amount: "80.1M",
-                        colorDefault: "sun-juniorDefault",
-                        colorSelected: "sun-juniorSelected",                         
-                        sel: false
-                    }]
-            },
-            {
-                lid: 2,
-                name : "Aprirose Retail Portfolio",
-                count: "n",
-                currencySymbol: "&pound;",
-                amount: "28.9M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false
-            },
-            {
-                lid: 3,
-                name : "Eurocastle Retail D Portfolio",
-                count: "n",
-                currencySymbol: "&pound;",
-                amount: "199.6M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false,
-                children : [
-                    {
-                        name : "B",
-                        count: "n",
-                        currencySymbol: "&pound;",
-                        amount: "2.6M",
-                        colorDefault: "sun-juniorDefault",
-                        colorSelected: "sun-juniorSelected",
-                        sel: false
-                    }]            
-            },
-            {
-                lid: 4,
-                name : "Metropolis Shopping Centre",
-                count: "n",
-                currencySymbol: "&pound;",
-                amount: "59.3M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false,                
-            },
-            {
-                lid: 5,
-                name : "Nextra Portfolio Italy",
-                count: "n",
-                currencySymbol: "&pound;",
-                amount: "81.1M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false
-            },
-            {
-                lid: 6,
-                name : "Orazio Portfolio",
-                count: "n",
-                currencySymbol: "&pound;",
-                amount: "100M",
-                colorDefault: "b-loansDefault",
-                colorSelected: "b-loansSelected",
-                sel: false,
-                children : [
-                    {
-                        name : "B",
-                        count: "n",
-                        currencySymbol: "&pound;",
-                        amount: "206.3M",
-                        colorDefault: "sun-juniorDefault",
-                        colorSelected: "sun-juniorSelected", 
-                        sel: false,
-                        children : [
-                            {
-                                name : "C",
-                                count: "n",
-                                currencySymbol: "&pound;",
-                                amount: "2144.1M",
-                                colorDefault: "sun-juniorDefault",
-                                colorSelected: "sun-juniorSelected",                                  
-                                sel: false
-                            }] 
-                    }]
-            }
-    ]};
+//    loans.data = {
+//        lid: 0,
+//        name : "Loans",
+//        count: 6,
+//        currencySymbol: "",
+//        amount: "",
+//        colorDefault: "loansDefault",
+//        colorSelected: "loansSelected",
+//        sel: true,
+//        children : [
+//            {
+//                lid: 1,
+//                name : "Antony Parc Office",
+//                count: "n",
+//                currencySymbol: "&pound;",
+//                amount: "80.1M",
+//                colorDefault: "b-loansDefault",
+//                colorSelected: "b-loansSelected",
+//                sel: false,
+//                children : [
+//                    {
+//                        name : "B",
+//                        count: "n",
+//                        currencySymbol: "&pound;",
+//                        amount: "80.1M",
+//                        colorDefault: "sun-juniorDefault",
+//                        colorSelected: "sun-juniorSelected",                         
+//                        sel: false
+//                    }]
+//            },
+//            {
+//                lid: 2,
+//                name : "Aprirose Retail Portfolio",
+//                count: "n",
+//                currencySymbol: "&pound;",
+//                amount: "28.9M",
+//                colorDefault: "b-loansDefault",
+//                colorSelected: "b-loansSelected",
+//                sel: false
+//            },
+//            {
+//                lid: 3,
+//                name : "Eurocastle Retail D Portfolio",
+//                count: "n",
+//                currencySymbol: "&pound;",
+//                amount: "199.6M",
+//                colorDefault: "b-loansDefault",
+//                colorSelected: "b-loansSelected",
+//                sel: false,
+//                children : [
+//                    {
+//                        name : "B",
+//                        count: "n",
+//                        currencySymbol: "&pound;",
+//                        amount: "2.6M",
+//                        colorDefault: "sun-juniorDefault",
+//                        colorSelected: "sun-juniorSelected",
+//                        sel: false
+//                    }]            
+//            },
+//            {
+//                lid: 4,
+//                name : "Metropolis Shopping Centre",
+//                count: "n",
+//                currencySymbol: "&pound;",
+//                amount: "59.3M",
+//                colorDefault: "b-loansDefault",
+//                colorSelected: "b-loansSelected",
+//                sel: false,                
+//            },
+//            {
+//                lid: 5,
+//                name : "Nextra Portfolio Italy",
+//                count: "n",
+//                currencySymbol: "&pound;",
+//                amount: "81.1M",
+//                colorDefault: "b-loansDefault",
+//                colorSelected: "b-loansSelected",
+//                sel: false
+//            },
+//            {
+//                lid: 6,
+//                name : "Orazio Portfolio",
+//                count: "n",
+//                currencySymbol: "&pound;",
+//                amount: "100M",
+//                colorDefault: "b-loansDefault",
+//                colorSelected: "b-loansSelected",
+//                sel: false,
+//                children : [
+//                    {
+//                        name : "B",
+//                        count: "n",
+//                        currencySymbol: "&pound;",
+//                        amount: "206.3M",
+//                        colorDefault: "sun-juniorDefault",
+//                        colorSelected: "sun-juniorSelected", 
+//                        sel: false,
+//                        children : [
+//                            {
+//                                name : "C",
+//                                count: "n",
+//                                currencySymbol: "&pound;",
+//                                amount: "2144.1M",
+//                                colorDefault: "sun-juniorDefault",
+//                                colorSelected: "sun-juniorSelected",                                  
+//                                sel: false
+//                            }] 
+//                    }]
+//            }
+//    ]};
 
     var ltree = d3.layout.tree()
         .nodeSize([loansObj.lnodesizex, loansObj.lnodesizey]);
@@ -590,23 +728,44 @@ $( document ).ready(function() {
     var loansGroup = container.append("g")
                                .attr("transform", "translate("+ loansObj.loansStart +",205)");     
     
-    loansObj.lroot = loans.data;
-    loansObj.lroot.x0 = loansObj.lheight / 2;
-    loansObj.lroot.y0 = 0;
-    // display only first level
-    loansObj.lroot.children.forEach(collapse); 
     
-    // select the first loan
-    if(loansObj.lroot.children.length > 1){
-        loansObj.lroot.children[0].sel = true;
-    }    
-    loansUpdate(loansObj.lroot); 
     
-    // after the svg update, reset it     
-    if(loansObj.lroot.children.length > 1){
-        loansObj.lroot.children[0].sel = false;
-    }      
+    function renderLoan(){
+        console.log('called loan')
 
+        
+        if(loanData && loanData!=''){
+            loansObj.data = loanData;
+            loansObj.lroot = loansObj.data;
+            loansObj.lroot.x0 = loansObj.lheight / 2;
+            loansObj.lroot.y0 = 0;
+            // display only first level
+            if(loansObj.lroot.children){
+                loansObj.lroot.children.forEach(collapse); 
+
+                            // select the first loan
+                if(loansObj.lroot.children.length > 1){
+                    loansObj.lroot.children[0].sel = true;
+                } 
+            }
+            
+
+   
+            loansUpdate(loansObj.lroot); 
+
+            // after the svg update, reset it 
+            if(loansObj.lroot.children){
+            if(loansObj.lroot.children.length > 1){
+                loansObj.lroot.children[0].sel = false;
+            } 
+            }            
+
+        }
+        
+       
+ 
+    
+    }
     
     function loansUpdate(source) {
         // Compute the new tree layout.
@@ -652,9 +811,9 @@ $( document ).ready(function() {
          var tspan2 = textspan.append('tspan');
          tspan1.text(function(d) { 
              var na = Util.getLimitedChar(d.name, 10);
-             if(d.count !='' && d.count !='n'){
-                 var na = na + '('+ d.count + ') ';
-             }
+//             if(d.count !='' && d.count !='n'){
+//                 var na = na + '('+ d.count + ') ';
+//             }
               return na ; })
                .attr("dy", function(d) { return (d.amount =='') ? "" : ".07em"; });
          tspan2.html(function(d) { var tex = d.currencySymbol +  d.amount; return tex ; })
@@ -1463,10 +1622,40 @@ $(window).resize(function(){
     location.reload();
 
 });
- // document ready end   
+ // document ready end  
+
+
+
+
+
 });
+//ajax call
+//d3.json("http://xm2.cloudapp.net:8082/odata/DealUniverse", function(error, serverData) {
+//d3.json("http://localhost:24583/api/test/GetDeal?DealID=65358")
+//    .post("userid=6", function(error, serverData) {
+//
+//    console.log(serverData);
+//    console.log('error ' + error);
+//});
 
 
+//$.ajax({
+//  type: "POST",
+//  //url: "http://localhost:24583/api/test/GetDeal?DealID=65358",
+//  url: "http://xm2.cloudapp.net:8082/api/SocialGraph/GetDealForSocialGraph?DealID=65358",
+//  data: { userid: 6}
+//})
+//  .done(function( msg ) {
+//    alert( "Data got  " + msg );
+//  })
+//  .fail(function( msg ) {
+//      var xmdata = {"name":"DECO 2005-E1X","amount":7184006.26,"children":[{"name":"A1","amount":0.00},{"name":"A2","amount":0.00},{"name":"X","amount":50685.00},{"name":"B","amount":0.00},{"name":"C","amount":0.00},{"name":"D","amount":0.00},{"name":"E","amount":0.00},{"name":"F","amount":0.00},{"name":"G","amount":2235685.00},{"name":"H","amount":4897636.26}]};
+//      console.log(xmdata);
+//    alert( "Data failed " + msg );
+//    
+//    // update 
+//  });
+  
 </script>
 </body>
 </html>
