@@ -31,10 +31,10 @@ $( document ).ready(function() {
     /*************************
      * Get the data through ajax call.
      *************************/
-    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetDealForSocialGraph?DealID=65358", function(error, serverData) {
+    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=deal&id=65358", function(error, serverData) {
         if(serverData){
-            dealData = serverData;
-            
+            dealData = serverData[0];
+            console.log(dealData);
             // adjust the data
             dealData.currencySymbol = "&pound;";
             dealData.colorDefault = "dealsDefault";
@@ -59,22 +59,54 @@ $( document ).ready(function() {
        
     });
 
-    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetLoanForSocialGraphByDealID?DealID=65647", function(error, serverData) {
+	
+    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=loandeal&id=65647", function(error, serverData) {
             if(serverData){
-                loanData = serverData;
-                   console.log()
-                // adjust the data
-                loanData.currencySymbol = "&pound;";
+			console.log(serverData);
+			                // adjust the data
+                loanData.currencySymbol = "";
                 loanData.colorDefault = "loansDefault";
                 loanData.colorSelected = "loansSelected";
                 loanData.sel = true;
+				loanData.name = "loans";
+				loanData.amount = "";
+				//loanData.children = serverData;
+				
+				
+				loanData.children =[{"id":65640,"type":"Loan","name":"EURO 25X A","amount":"345.27M"},{"id":65647,"type":"Loan","name":"EURO 25X B","amount":51.95},{"id":65647,"type":"Loan","name":"EURO 25X C","amount":56.64},{"id":65647,"type":"Loan","name":"EURO 25X D","amount":45.05},{"id":65647,"type":"Loan","name":"EURO 25X E","amount":19.57},{"id":65647,"type":"Loan","name":"EURO 25X F","amount":14.34},{"id":65647,"type":"Loan","name":"EURO 25X G","amount":6.93},{"id":65647,"type":"Loan","name":"Metropolis Shopping Centre","amount":59.35},{"id":65647,"type":"Loan","name":"Nextra Portfolio Italy","amount":81.12},{"id":65647,"type":"Loan","name":"Aprirose Retail Portfolio","amount":28.98},{"id":65647,"type":"Loan","name":"Eurocastle Retail D Portfolio","amount":199.64},{"id":65647,"type":"Loan","name":"Orazio Portfolio","amount":206.33},{"id":65647,"type":"Loan","name":"Tishman Munich Elisenhof","amount":144.12},{"id":65647,"type":"Loan","name":"Antony Parc Office","amount":80.18}];
+			// create new object for the client
+			schildren = [];
+			/*if(serverData.length > 1){
+				$.each( serverData, function( key, cuObj ) {
+					cuObj.currencySymbol = "&pound;";
+					cuObj.colorDefault = "b-loansDefault";
+					cuObj.colorSelected = "b-loansSelected";
+					cuObj.sel = false;
+					
+					// check sub loans
+					if(cuObj.children){
+						cuObj.children = subloans(cuObj.children);
+					}
+					
+					schildren[key] = cuObj;
+
+				});
+				loanData.children  = schildren;
+			} */
+			//loanData = serverData;
+                   console.log(loanData)
+
+				console.log(loanData.children.length)
 
                 if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
+				console.log('i am here ');
                     loanData.children = loanData.children.slice(0, 8);
                 }
-                
+               
                 if(loanData.children){
+				
                     loanData.count = loanData.children.length;
+					 console.log(loanData);
                     $.each( loanData.children, function( key, childObj ) {
                         childObj.currencySymbol = "&pound;";
                         childObj.colorDefault = "b-loansDefault";
@@ -82,13 +114,13 @@ $( document ).ready(function() {
                         childObj.sel = false;
                         
                         // check sub loans
-                        if(childObj.children){
-                            childObj.children = subloans(childObj.children);
-                        }
+                        /*if(childObj.children){
+                         //   childObj.children = subloans(childObj.children);
+                        }*/
                     });
                 }
 
-
+			console.log(loanData);
 
 
                 renderLoan();
@@ -96,6 +128,7 @@ $( document ).ready(function() {
      
        
     });
+	
 
         
     
@@ -112,7 +145,7 @@ $( document ).ready(function() {
         
         return obj;
     }
-    
+   /* 
     d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetPropertyForSocialGraphByLoanID?loanId=66221", function(error, serverData) {
             if(serverData){
                 propertiesData = serverData;
@@ -149,7 +182,9 @@ $( document ).ready(function() {
             }
      
        
-    });    
+    });  
+
+*/	
     
         
     /*********************************
