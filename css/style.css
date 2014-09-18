@@ -132,3 +132,9 @@ path.link {
 .tranchesSelected ~ text {
     fill: #ffffff;
 }
+.white{
+    fill: #fff;
+}
+.lwhite{
+    fill: #fff;
+}

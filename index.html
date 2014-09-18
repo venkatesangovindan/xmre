@@ -23,18 +23,28 @@
 
 <script>
 $( document ).ready(function() {
-    
+    // 65647
     var dealData = {};
     var loanData = {};
     var propertiesData = {};
     
+    var selectedloan='';
+    
+    var dealId = Util.getUrlParamByName('did');
+    var loanId = Util.getUrlParamByName('lid');
+    var propertyId = Util.getUrlParamByName('pid');
+    
+    if(!dealId || dealId==''){
+        dealId = 65358;
+    }
+   console.log('did '+ dealId);
+    
     /*************************
      * Get the data through ajax call.
      *************************/
-    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=deal&id=65358", function(error, serverData) {
-        if(serverData){
+    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=deal&id="+dealId, function(error, serverData) {
+        if(serverData && serverData!==''){
             dealData = serverData[0];
-            console.log(dealData);
             // adjust the data
             dealData.currencySymbol = "&pound;";
             dealData.colorDefault = "dealsDefault";
@@ -51,82 +61,71 @@ $( document ).ready(function() {
                 childObj.colorSelected = "tranchesSelected";
                 childObj.sel = false;
             });
-            
-            
-            renderDeal();
+        }else{
+            // if deal data is empty then render just simple circle
+            dealData.currencySymbol = "&pound;";
+            dealData.colorDefault = "white";
+            dealData.colorSelected = "white";            
+            dealData.sel = true;
+            dealData.name ="No Deal";
+            dealData.amount = "";
         }
      
-       
+       renderDeal();
     });
 
 	
-    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=loandeal&id=65647", function(error, serverData) {
-            if(serverData){
-			console.log(serverData);
-			                // adjust the data
-                loanData.currencySymbol = "";
-                loanData.colorDefault = "loansDefault";
-                loanData.colorSelected = "loansSelected";
-                loanData.sel = true;
-				loanData.name = "loans";
-				loanData.amount = "";
-				//loanData.children = serverData;
-				
-				
-				loanData.children =[{"id":65640,"type":"Loan","name":"EURO 25X A","amount":"345.27M"},{"id":65647,"type":"Loan","name":"EURO 25X B","amount":51.95},{"id":65647,"type":"Loan","name":"EURO 25X C","amount":56.64},{"id":65647,"type":"Loan","name":"EURO 25X D","amount":45.05},{"id":65647,"type":"Loan","name":"EURO 25X E","amount":19.57},{"id":65647,"type":"Loan","name":"EURO 25X F","amount":14.34},{"id":65647,"type":"Loan","name":"EURO 25X G","amount":6.93},{"id":65647,"type":"Loan","name":"Metropolis Shopping Centre","amount":59.35},{"id":65647,"type":"Loan","name":"Nextra Portfolio Italy","amount":81.12},{"id":65647,"type":"Loan","name":"Aprirose Retail Portfolio","amount":28.98},{"id":65647,"type":"Loan","name":"Eurocastle Retail D Portfolio","amount":199.64},{"id":65647,"type":"Loan","name":"Orazio Portfolio","amount":206.33},{"id":65647,"type":"Loan","name":"Tishman Munich Elisenhof","amount":144.12},{"id":65647,"type":"Loan","name":"Antony Parc Office","amount":80.18}];
-			// create new object for the client
-			schildren = [];
-			/*if(serverData.length > 1){
-				$.each( serverData, function( key, cuObj ) {
-					cuObj.currencySymbol = "&pound;";
-					cuObj.colorDefault = "b-loansDefault";
-					cuObj.colorSelected = "b-loansSelected";
-					cuObj.sel = false;
-					
-					// check sub loans
-					if(cuObj.children){
-						cuObj.children = subloans(cuObj.children);
-					}
-					
-					schildren[key] = cuObj;
+    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=loandeal&id="+dealId, function(error, serverData) {
+        
+        if(serverData && serverData!=='' && !$.isEmptyObject(serverData)){
+            // adjust the data
+            loanData.currencySymbol = "";
+            loanData.colorDefault = "loansDefault";
+            loanData.colorSelected = "loansSelected";
+            loanData.sel = true;
+            loanData.name = "loans";
+            loanData.amount = "";
+            loanData.children = serverData;
 
-				});
-				loanData.children  = schildren;
-			} */
-			//loanData = serverData;
-                   console.log(loanData)
-
-				console.log(loanData.children.length)
-
-                if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
-				console.log('i am here ');
-                    loanData.children = loanData.children.slice(0, 8);
-                }
-               
-                if(loanData.children){
-				
-                    loanData.count = loanData.children.length;
-					 console.log(loanData);
-                    $.each( loanData.children, function( key, childObj ) {
-                        childObj.currencySymbol = "&pound;";
-                        childObj.colorDefault = "b-loansDefault";
-                        childObj.colorSelected = "b-loansSelected";
-                        childObj.sel = false;
-                        
-                        // check sub loans
-                        /*if(childObj.children){
-                         //   childObj.children = subloans(childObj.children);
-                        }*/
-                    });
-                }
-
-			console.log(loanData);
-
-
-                renderLoan();
+            if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
+                loanData.children = loanData.children.slice(0, 8);
             }
+
+            if(loanData.children && loanData.children.length >= 1){
+                loanData.count = loanData.children.length;                
+                $.each( loanData.children, function( key, childObj ) {
+                    childObj.currencySymbol = "&pound;";
+                    childObj.colorDefault = "b-loansDefault";
+                    childObj.colorSelected = "b-loansSelected";
+                    childObj.sel = false;
+                    // check sub loans
+                    /*if(childObj.children){
+                     //   childObj.children = subloans(childObj.children);
+                    }*/
+                });
+                selectedloan = loanData.children[0].id;
+                loanData.children[0].sel = true;
+            }            
+
+        }else{
+            loanData.currencySymbol = "";
+            loanData.colorDefault = "lwhite";
+            loanData.colorSelected = "lwhite";
+            loanData.sel = true;
+            loanData.name = "No Loans";
+            loanData.amount = "";
+
+        }
+        // show property
+        if(selectedloan && selectedloan!==''){
+            console.log(' calling this');
+            getPropertyAndRender(selectedloan);
+            //getPropertyAndRender(66221);
+        }else{
+            getPropertyAndRender();
+        }        
      
-       
+        renderLoan();
     });
 	
 
@@ -145,46 +144,78 @@ $( document ).ready(function() {
         
         return obj;
     }
-   /* 
-    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetPropertyForSocialGraphByLoanID?loanId=66221", function(error, serverData) {
-            if(serverData){
-                propertiesData = serverData;
-                  
-                // adjust the data
-                propertiesData.currencySymbol = "&pound;";
-                propertiesData.colorDefault = "loansDefault";
-                propertiesData.colorSelected = "loansSelected";
-                propertiesData.sel = true;
-
-                if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
-                    loanData.children = loanData.children.slice(0, 8);
-                }
-                
-                if(loanData.children){
-                    loanData.count = loanData.children.length;
-                    $.each( loanData.children, function( key, childObj ) {
-                        childObj.currencySymbol = "&pound;";
-                        childObj.colorDefault = "b-loansDefault";
-                        childObj.colorSelected = "b-loansSelected";
-                        childObj.sel = false;
-                        
-                        // check sub loans
-                        if(childObj.children){
-                            childObj.children = subloans(childObj.children);
-                        }
-                    });
-                }
-
-
-
-
-                renderLoan();
-            }
-     
+    
+    function getPropertyAndRender(sloanid){
        
-    });  
+        if(sloanid!='' && $.isNumeric(sloanid)){
+            // get the data
+            d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=propertyloan&id="+sloanid, function(error, serverData) {
+                
+                if(serverData && serverData!=='' && !$.isEmptyObject(serverData)){
+                    console.log(' calling this all time');
+                    
+                   // return false;
+                    // adjust the data
+                    propertiesData.currencySymbol = "&pound;";
+                    propertiesData.colorDefault = "propertiesDefault";
+                    propertiesData.colorSelected = "propertiesSelected";
+                    propertiesData.name = "Properties";
+                    propertiesData.amount = "";
+                    propertiesData.sel = true;
+                    
+                    propertiesData.children = serverData;
+                    
+                    if(propertiesData.children && propertiesData.children.length >6){ // only show 6 tranches now - it can be change
+                        propertiesData.children = propertiesData.children.slice(0, 6);
+                    }
+                
+                    if(propertiesData.children && propertiesData.children.length >= 1){
+                        propertiesData.count = propertiesData.children.length;
+                        
+                        $.each( propertiesData.children, function( key, childObj ) {
+                            childObj.currencySymbol = "&pound;";
+                            childObj.colorDefault = "properties-singleDefault";
+                            childObj.colorSelected = "properties-singleSelected";
+                            childObj.sel = false;
 
-*/	
+                            // check sub loans
+    //                        if(childObj.children){
+    //                            childObj.children = subloans(childObj.children);
+    //                        }
+                        });
+                    }
+                   
+                }else{
+                    if(propertiesData.children){
+                        propertiesData.children = '';
+                    }
+                    propertiesData.currencySymbol = "&pound;";
+                    propertiesData.colorDefault = "lwhite";
+                    propertiesData.colorSelected = "lwhite";
+
+                    propertiesData.name = "No Properties";
+                    propertiesData.amount = "";                
+                }
+                 console.log(propertiesData.name);
+                renderProperties();
+            });                  
+            
+        }else{
+            if(propertiesData.children){
+                        propertiesData.children = '';
+                    }
+            propertiesData.currencySymbol = "&pound;";
+            propertiesData.colorDefault = "lwhite";
+            propertiesData.colorSelected = "lwhite";
+
+            propertiesData.name = "No Properties";
+            propertiesData.amount = "";   
+            
+            renderProperties();
+        }
+
+    }
+	
     
         
     /*********************************
@@ -376,59 +407,6 @@ $( document ).ready(function() {
     /**********************************************
      * Deals D3 js
      **********************************************/                 
-   
-
-//    deals.data = {
-//        name : "EURO 25X",
-//        currencySymbol: "&pound;",
-//        amount: "80.1M",
-//        colorDefault: "dealsDefault",
-//        colorSelected: "dealsSelected",
-//        sel: true,        
-//        children : [
-//            {
-//                name : "A",
-//                currencySymbol: "&pound;",
-//                amount: "821.7M",
-//                colorDefault: "tranchesDefault",
-//                colorSelected: "tranchesSelected",
-//                sel: false                 
-//            },
-//            {
-//                name : "B",
-//                currencySymbol: "&pound;",
-//                amount: "47.6M", 
-//                colorDefault: "tranchesDefault",
-//                colorSelected: "tranchesSelected",
-//                sel: false                 
-//            },
-//            {
-//                name : "C",
-//                currencySymbol: "&pound;",
-//                amount: "50M",
-//                colorDefault: "tranchesDefault",
-//                colorSelected: "tranchesSelected",
-//                sel: false                 
-//            },
-//            {
-//                name : "D",
-//                currencySymbol: "&pound;",
-//                amount: "36.5M",
-//                colorDefault: "tranchesDefault",
-//                colorSelected: "tranchesSelected",
-//                sel: false                 
-//            },
-//            {
-//                name : "E",
-//                currencySymbol: "&pound;",
-//                amount: "15.8M",
-//                colorDefault: "tranchesDefault",
-//                colorSelected: "tranchesSelected",
-//                sel: false,
-//            }
-//    ]};
-             
-
     var dtree = d3.layout.tree()
        .size([dealsObj.dviewerHeight, dealsObj.dviewerWidth]);
 
@@ -439,7 +417,7 @@ $( document ).ready(function() {
         });
 
     var dealsGroup = container.append("g")
-                               .attr("transform", "translate("+ dealsObj.dealsStart + ",-20)");  
+                              .attr("transform", "translate("+ dealsObj.dealsStart + ",-20)");  
 
     function dealsClick(d) {
         if (d3.event.defaultPrevented) return; // click suppressed
@@ -485,7 +463,7 @@ $( document ).ready(function() {
             .attr("transform", function(d) {
                 return "translate(" + source.y0 + "," + source.x0 + ")";
             })
-            .on("mouseover", function(d) {
+            .on("mouseover", function(d) { if(d.name=='') {return false;}
                 tooltip.transition()        
                         .duration(200)
                         .style("opacity", .9);      
@@ -494,7 +472,7 @@ $( document ).ready(function() {
                         .style("width", "150px") 
                         .style("top", (d3.event.pageY - 45) + "px");
             })                  
-            .on("mouseout", function(d) {       
+            .on("mouseout", function(d) {    if(d.name=='') {return false;}   
                 tooltip.transition()        
                         .duration(500)
                         .style("opacity", 0);   
@@ -512,7 +490,7 @@ $( document ).ready(function() {
          var tspan1 = textspan.append('tspan');
          var tspan2 = textspan.append('tspan');
          
-         tspan1.text(function(d) { return Util.wordWrap(d.name, dealsObj.maxDisplayChar); })
+         tspan1.text(function(d) { return Util.getLimitedChar(d.name, dealsObj.maxDisplayChar); })
                .attr("dy", function(d) { return (d.amount ==='') ? "" : ".07em"; });
          tspan2.html(function(d) { 
                     if(d.amount){var tex = d.currencySymbol +  d.amount; return tex ;}
@@ -620,9 +598,7 @@ $( document ).ready(function() {
     }
 
     function renderDeal(){
-        console.log(' called ');
         if(dealData && dealData!=''){
-            console.log(' i am here ');
             //if data present 
             dealsObj.data = dealData;
                 // Define the root
@@ -631,7 +607,10 @@ $( document ).ready(function() {
             dealsObj.droot.y0 = 0;
 
             // only show first level nodes
-            dealsObj.droot.children.forEach(collapse);
+            if(dealsObj.droot.children && dealsObj.droot.children.length >= 1){
+                dealsObj.droot.children.forEach(collapse);
+            }
+            
             dealsUpdate(dealsObj.droot);
         }
     }
@@ -642,118 +621,6 @@ $( document ).ready(function() {
     /**********************************************
      * Loans D3 js
      **********************************************/
-//    loans.data = {
-//        lid: 0,
-//        name : "Loans",
-//        count: 6,
-//        currencySymbol: "",
-//        amount: "",
-//        colorDefault: "loansDefault",
-//        colorSelected: "loansSelected",
-//        sel: true,
-//        children : [
-//            {
-//                lid: 1,
-//                name : "Antony Parc Office",
-//                count: "n",
-//                currencySymbol: "&pound;",
-//                amount: "80.1M",
-//                colorDefault: "b-loansDefault",
-//                colorSelected: "b-loansSelected",
-//                sel: false,
-//                children : [
-//                    {
-//                        name : "B",
-//                        count: "n",
-//                        currencySymbol: "&pound;",
-//                        amount: "80.1M",
-//                        colorDefault: "sun-juniorDefault",
-//                        colorSelected: "sun-juniorSelected",                         
-//                        sel: false
-//                    }]
-//            },
-//            {
-//                lid: 2,
-//                name : "Aprirose Retail Portfolio",
-//                count: "n",
-//                currencySymbol: "&pound;",
-//                amount: "28.9M",
-//                colorDefault: "b-loansDefault",
-//                colorSelected: "b-loansSelected",
-//                sel: false
-//            },
-//            {
-//                lid: 3,
-//                name : "Eurocastle Retail D Portfolio",
-//                count: "n",
-//                currencySymbol: "&pound;",
-//                amount: "199.6M",
-//                colorDefault: "b-loansDefault",
-//                colorSelected: "b-loansSelected",
-//                sel: false,
-//                children : [
-//                    {
-//                        name : "B",
-//                        count: "n",
-//                        currencySymbol: "&pound;",
-//                        amount: "2.6M",
-//                        colorDefault: "sun-juniorDefault",
-//                        colorSelected: "sun-juniorSelected",
-//                        sel: false
-//                    }]            
-//            },
-//            {
-//                lid: 4,
-//                name : "Metropolis Shopping Centre",
-//                count: "n",
-//                currencySymbol: "&pound;",
-//                amount: "59.3M",
-//                colorDefault: "b-loansDefault",
-//                colorSelected: "b-loansSelected",
-//                sel: false,                
-//            },
-//            {
-//                lid: 5,
-//                name : "Nextra Portfolio Italy",
-//                count: "n",
-//                currencySymbol: "&pound;",
-//                amount: "81.1M",
-//                colorDefault: "b-loansDefault",
-//                colorSelected: "b-loansSelected",
-//                sel: false
-//            },
-//            {
-//                lid: 6,
-//                name : "Orazio Portfolio",
-//                count: "n",
-//                currencySymbol: "&pound;",
-//                amount: "100M",
-//                colorDefault: "b-loansDefault",
-//                colorSelected: "b-loansSelected",
-//                sel: false,
-//                children : [
-//                    {
-//                        name : "B",
-//                        count: "n",
-//                        currencySymbol: "&pound;",
-//                        amount: "206.3M",
-//                        colorDefault: "sun-juniorDefault",
-//                        colorSelected: "sun-juniorSelected", 
-//                        sel: false,
-//                        children : [
-//                            {
-//                                name : "C",
-//                                count: "n",
-//                                currencySymbol: "&pound;",
-//                                amount: "2144.1M",
-//                                colorDefault: "sun-juniorDefault",
-//                                colorSelected: "sun-juniorSelected",                                  
-//                                sel: false
-//                            }] 
-//                    }]
-//            }
-//    ]};
-
     var ltree = d3.layout.tree()
         .nodeSize([loansObj.lnodesizex, loansObj.lnodesizey]);
 
@@ -761,45 +628,27 @@ $( document ).ready(function() {
             .projection(function(d) { return [d.x, d.y]; });
     
     var loansGroup = container.append("g")
-                               .attr("transform", "translate("+ loansObj.loansStart +",205)");     
-    
-    
+                              .attr("transform", "translate("+ loansObj.loansStart +",205)");     
     
     function renderLoan(){
-        console.log('called loan')
-
-        
         if(loanData && loanData!=''){
             loansObj.data = loanData;
             loansObj.lroot = loansObj.data;
             loansObj.lroot.x0 = loansObj.lheight / 2;
             loansObj.lroot.y0 = 0;
             // display only first level
-            if(loansObj.lroot.children){
+            if(loansObj.lroot.children && loansObj.lroot.children.length >= 1){
                 loansObj.lroot.children.forEach(collapse); 
-
-                            // select the first loan
-                if(loansObj.lroot.children.length > 1){
-                    loansObj.lroot.children[0].sel = true;
-                } 
+                loansObj.lroot.children[0].sel = true;
             }
             
-
-   
             loansUpdate(loansObj.lroot); 
 
             // after the svg update, reset it 
-            if(loansObj.lroot.children){
-            if(loansObj.lroot.children.length > 1){
+            if(loansObj.lroot.children && loansObj.lroot.children.length >= 1){
                 loansObj.lroot.children[0].sel = false;
-            } 
             }            
-
         }
-        
-       
- 
-    
     }
     
     function loansUpdate(source) {
@@ -818,7 +667,7 @@ $( document ).ready(function() {
         var nodeEnter = node.enter().append("svg:g")
             .attr("class", "node")
             .attr("transform", function(d) { return "translate(" + d.x + "," + (d.y + 10) + ")"; })
-            .on("mouseover", function(d) {
+            .on("mouseover", function(d) {if(d.name==''){return false;}
                 tooltip.transition()        
                         .duration(200)
                         .style("opacity", .9);      
@@ -949,18 +798,20 @@ $( document ).ready(function() {
         }
         
         // update the property based on the loans
+        console.log(d);
         if(propertiesObj){
            // console.log(d.lid);
-            if(typeof d.lid == 'undefined'){
+            if(typeof d.id == 'undefined'){
                 return false;
             }
             
             var loadid = 0;
-            if(d.lid > 0){
-                loadid = d.lid - 1;
+            if(d.id > 0){
+                loadid = d.id - 1;
             }
             
-            updatePropertiesByLoan(loadid);
+           // updatePropertiesByLoan(loadid);
+            getPropertyAndRender(loadid);
         }
         
     } 
@@ -976,502 +827,33 @@ $( document ).ready(function() {
     /**********************************************
      * Properties D3 js
      **********************************************/
-    properties.data = {
-        lp:[
-            {
-                name : "Properties",
-                count: 1,
-                colorDefault: "propertiesDefault",
-                colorSelected: "propertiesSelected",
-                sel: true,
-                plusSign: false,
-                children : [
-                    {
-                        name : "Antony Parc",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    }
-                ]
-            },
-            {
-                name : "Properties",
-                count: 4,
-                colorDefault: "propertiesDefault",
-                colorSelected: "propertiesSelected",
-                sel: true,
-                plusSign: false,
-                children : [
-                    {
-                        name : "Bayreuth, Leibnitzstr. 6",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    },{
-                        name : "Lichtenfels, Mainau 16",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                  
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    },
-                    {
-                        name : "Munchberg, Helmbrechtser Str.",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                  
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false,                         
-                                plusSign: false
-                            }]
-                    },
-                    {
-                        name : "Schleiz, Oettersdorfer Str.",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                 
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false,                         
-                                plusSign: false
-                            }]
-                    }               
-                ]
-            },
-            {
-                name : "Properties",
-                count: 5,
-                colorDefault: "propertiesDefault",
-                colorSelected: "propertiesSelected",
-                sel: true,
-                plusSign: false,
-                children : [
-                    {
-                        name : "Munnerstadt",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    },{
-                        name : "Beckum",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                  
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    },
-                    {
-                        name : "Bockenem",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                  
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false,                         
-                                plusSign: false
-                            }]
-                    },
-                    {
-                        name : "Celle",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                 
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false,                         
-                                plusSign: false
-                            }]
-                    },
-                    {
-                        name : "Eisenach",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false,                        
-                                plusSign: false
-                            }]
-                    }                    
-                ]
-            },
-            {
-                name : "Properties",
-                count: 1,
-                colorDefault: "propertiesDefault",
-                colorSelected: "propertiesSelected",
-                sel: true,
-                plusSign: false,
-                children : [
-                    {
-                        name : "Metropolis Shoppping Center",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    }
-                ]
-            },
-            {
-                name : "Properties",
-                count: 3,
-                colorDefault: "propertiesDefault",
-                colorSelected: "propertiesSelected",
-                sel: true,
-                plusSign: false,
-                children : [
-                    {
-                        name : "Cesano Boscone, V. R. Sanzio",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    },{
-                        name : "Rozzano (MI) Milanofiori",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                  
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    },
-                    {
-                        name : "Milano, V. Gadames 7/57",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                  
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false,                         
-                                plusSign: false
-                            }]
-                    }          
-                ]
-            },            
-            {
-                name : "Properties",
-                count: 3,
-                colorDefault: "propertiesDefault",
-                colorSelected: "propertiesSelected",
-                sel: true,
-                plusSign: false,
-                children : [
-                    {
-                        name : "Penny BI",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    },{
-                        name : "Penny Cremona",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                  
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false, 
-                                plusSign: false
-                            }]
-                    },
-                    {
-                        name : "Penny MS",
-                        count: "n",           
-                        plusSign: true,
-                        colorDefault: "properties-singleDefault",
-                        colorSelected: "properties-singleSelected",
-                        sel: false,                  
-                        children : [
-                            {
-                                name : "Sponsor",
-                                count: "",
-                                colorDefault: "sponsorDefault",
-                                colorSelected: "sponsorSelected",
-                                sel: false,                        
-                                plusSign: false
-                            },{
-                                name : "Tenant",
-                                count: "",
-                                colorDefault: "tenantDefault",
-                                colorSelected: "tenantSelected",
-                                sel: false,                         
-                                plusSign: false
-                            }]
-                    }                    
-                ]
-            }
-        ]
-       };
-    //console.log( properties.data.lp[0]);
-    
-    
+
    // Define the root
-    propertiesObj.proot = properties.data.lp[0];
-    propertiesObj.proot.x0 = propertiesObj.pheight / 2;
-    propertiesObj.proot.y0 = 0;
-    
+//    propertiesObj.proot = properties.data.lp[0];
+//    propertiesObj.proot.x0 = propertiesObj.proot / 2;
+//    propertiesObj.proot.y0 = 0;
+//    
     // get the angles for properties tree
    // var ptreeAngle = 360;
     
 
     
     function updatePtreeAngle(){
-        if(propertiesObj.proot.children.length == 1){
-            propertiesObj.ptreeAngle = -150;
-           // propertiesObj.pnodedepth = 100;
-        }else if(propertiesObj.proot.children.length == 2){
-            propertiesObj.ptreeAngle = -180;
-        }else if(propertiesObj.proot.children.length == 3){
-            propertiesObj.ptreeAngle = -180;
-        }else if(propertiesObj.proot.children.length >= 4){
-            propertiesObj.ptreeAngle = 360;
-        } 
-    }
-    
-    updatePtreeAngle();
+        propertiesObj.ptreeAngle = 360;
+        if(propertiesObj.proot.children && propertiesObj.proot.children.length >= 1){
+            if(propertiesObj.proot.children.length == 1){
+                propertiesObj.ptreeAngle = -150;
+               // propertiesObj.pnodedepth = 100;
+            }else if(propertiesObj.proot.children.length == 2){
+                propertiesObj.ptreeAngle = -180;
+            }else if(propertiesObj.proot.children.length == 3){
+                propertiesObj.ptreeAngle = -180;
+            }else if(propertiesObj.proot.children.length >= 4){
+                propertiesObj.ptreeAngle = 360;
+            } 
+        }
 
+    }
 
     var pdiagonal = d3.svg.diagonal.radial()
         .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
@@ -1480,7 +862,28 @@ $( document ).ready(function() {
         .attr("transform", "translate("+ propertiesObj.propertiesStart +",205)");
 
     
+    function renderProperties(){
+        if(propertiesData && propertiesData!=''){
+            propertiesObj.data = propertiesData;
+            propertiesObj.proot = propertiesObj.data;
+            propertiesObj.proot.x0 = propertiesObj.proot / 2;
+            propertiesObj.proot.y0 = 0;
+            // display only first level
+            if(propertiesObj.proot.children && propertiesObj.proot.children.length >= 1){
+                propertiesObj.proot.children.forEach(collapse);
+                propertiesObj.proot.children[0].sel = true;
+            }
 
+            updatePtreeAngle();
+            console.log(propertiesObj.proot);
+            propertiesUpdate(propertiesObj.proot); 
+
+            // after the svg update, reset it 
+            if(propertiesObj.proot.children && propertiesObj.proot.children.length >= 1){
+                propertiesObj.proot.children[0].sel = false;
+            }            
+        }
+    }
     
     function propertiesUpdate(source) {
         
@@ -1532,9 +935,12 @@ $( document ).ready(function() {
             .attr("dy", ".35em")
             .attr("text-anchor", "middle")
             .attr("transform", function(d) { return d.x < 180 ? "translate(0)" : "translate(-" + (d.name.length * 8.5)  + ")"; })
-            .text(function(d) { 
+            .text(function(d) {
+                console.log(d.name);
+        console.log('calling this one ');
                 var nap = Util.getLimitedChar(d.name, 10); 
-                if(d.count!='' && d.count!='n'){nap = nap + '(' + d.count+')'};
+               // if(d.count!='' && d.count!='n'){nap = nap + '(' + d.count+')'};
+               console.log('nap'+nap)
                 return nap; })
             .style("fill-opacity", 1e-6);
        
@@ -1546,7 +952,7 @@ $( document ).ready(function() {
                // return ""; 
             })
 
-        nodeUpdate.select("circle")
+        nodeUpdate.selectAll("circle")
             .attr("r", function(d) {
                 var rval = 30;
                 switch(d.depth){
@@ -1565,7 +971,7 @@ $( document ).ready(function() {
             })
             .attr("class", function(d) { return d.sel ? d.colorSelected : d.colorDefault; });
     
-        nodeUpdate.select("text")
+        nodeUpdate.selectAll("text")
             .style("fill-opacity", 1)
             .attr("transform", function(d) { 
                 return  "rotate("+ ( -d.x + 90 )+ ")translate(-" + 10  + ")"; 
@@ -1645,8 +1051,8 @@ $( document ).ready(function() {
         } 
     }
         // only show first level nodes
-    propertiesObj.proot.children.forEach(collapse);    
-    propertiesUpdate(propertiesObj.proot);
+//    propertiesObj.proot.children.forEach(collapse);    
+//    propertiesUpdate(propertiesObj.proot);
 
     
 function zoomed() {

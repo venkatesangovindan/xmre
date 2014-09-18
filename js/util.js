@@ -39,9 +39,20 @@ Util.testWhite = function(x){
 };
 
 Util.getLimitedChar = function(str, maxchar){
+    if(str =='' || str == undefined ){
+        return '';
+    }
     if(str.length > maxchar){
         str = str.substring(0,maxchar);
     }
       return str;  
+};
+
+Util.getUrlParamByName = function(name){
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+    var results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));    
+    
 };
 
