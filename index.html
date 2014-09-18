@@ -7,12 +7,7 @@
     <script src="js/util.js"></script>
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <style>
-.axis line {
-  fill: none;
-  stroke: #ddd;
-  shape-rendering: crispEdges;
-  vector-effect: non-scaling-stroke;
-}        
+      
 
     </style>
 </head>
@@ -118,7 +113,6 @@ $( document ).ready(function() {
         }
         // show property
         if(selectedloan && selectedloan!==''){
-            console.log(' calling this');
             getPropertyAndRender(selectedloan);
             //getPropertyAndRender(66221);
         }else{
@@ -152,9 +146,6 @@ $( document ).ready(function() {
             d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=propertyloan&id="+sloanid, function(error, serverData) {
                 
                 if(serverData && serverData!=='' && !$.isEmptyObject(serverData)){
-                    console.log(' calling this all time');
-                    
-                   // return false;
                     // adjust the data
                     propertiesData.currencySymbol = "&pound;";
                     propertiesData.colorDefault = "propertiesDefault";
@@ -196,7 +187,6 @@ $( document ).ready(function() {
                     propertiesData.name = "No Properties";
                     propertiesData.amount = "";                
                 }
-                 console.log(propertiesData.name);
                 renderProperties();
             });                  
             
@@ -384,26 +374,6 @@ $( document ).ready(function() {
         .attr("class", "dealsToLoans");
     
     
-//container.append("g")
-//    .attr("class", "x axis")
-//  .selectAll("line")
-//    .data(d3.range(0, width, 10))
-//  .enter().append("line")
-//    .attr("x1", function(d) { return d; })
-//    .attr("y1", 0)
-//    .attr("x2", function(d) { return d; })
-//    .attr("y2", height);
-//
-//container.append("g")
-//    .attr("class", "y axis")
-//  .selectAll("line")
-//    .data(d3.range(0, height, 10))
-//  .enter().append("line")
-//    .attr("x1", 0)
-//    .attr("y1", function(d) { return d; })
-//    .attr("x2", width)
-//    .attr("y2", function(d) { return d; });
-
     /**********************************************
      * Deals D3 js
      **********************************************/                 
@@ -798,9 +768,7 @@ $( document ).ready(function() {
         }
         
         // update the property based on the loans
-        console.log(d);
         if(propertiesObj){
-           // console.log(d.lid);
             if(typeof d.id == 'undefined'){
                 return false;
             }
@@ -810,33 +778,15 @@ $( document ).ready(function() {
                 loadid = d.id - 1;
             }
             
-           // updatePropertiesByLoan(loadid);
             getPropertyAndRender(loadid);
         }
         
     } 
-    
-    function updatePropertiesByLoan(loanid){
-         // update 
-        propertiesObj.proot = properties.data.lp[loanid];
-        propertiesObj.proot.children.forEach(collapse); 
-        updatePtreeAngle();
-        propertiesUpdate(propertiesObj.proot);
-    }
+
     // loans end
     /**********************************************
      * Properties D3 js
      **********************************************/
-
-   // Define the root
-//    propertiesObj.proot = properties.data.lp[0];
-//    propertiesObj.proot.x0 = propertiesObj.proot / 2;
-//    propertiesObj.proot.y0 = 0;
-//    
-    // get the angles for properties tree
-   // var ptreeAngle = 360;
-    
-
     
     function updatePtreeAngle(){
         propertiesObj.ptreeAngle = 360;
@@ -875,7 +825,6 @@ $( document ).ready(function() {
             }
 
             updatePtreeAngle();
-            console.log(propertiesObj.proot);
             propertiesUpdate(propertiesObj.proot); 
 
             // after the svg update, reset it 
@@ -936,11 +885,8 @@ $( document ).ready(function() {
             .attr("text-anchor", "middle")
             .attr("transform", function(d) { return d.x < 180 ? "translate(0)" : "translate(-" + (d.name.length * 8.5)  + ")"; })
             .text(function(d) {
-                console.log(d.name);
-        console.log('calling this one ');
                 var nap = Util.getLimitedChar(d.name, 10); 
                // if(d.count!='' && d.count!='n'){nap = nap + '(' + d.count+')'};
-               console.log('nap'+nap)
                 return nap; })
             .style("fill-opacity", 1e-6);
        
@@ -1050,10 +996,6 @@ $( document ).ready(function() {
             }
         } 
     }
-        // only show first level nodes
-//    propertiesObj.proot.children.forEach(collapse);    
-//    propertiesUpdate(propertiesObj.proot);
-
     
 function zoomed() {
   container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -1070,33 +1012,7 @@ $(window).resize(function(){
 
 
 });
-//ajax call
-//d3.json("http://xm2.cloudapp.net:8082/odata/DealUniverse", function(error, serverData) {
-//d3.json("http://localhost:24583/api/test/GetDeal?DealID=65358")
-//    .post("userid=6", function(error, serverData) {
-//
-//    console.log(serverData);
-//    console.log('error ' + error);
-//});
-
-
-//$.ajax({
-//  type: "POST",
-//  //url: "http://localhost:24583/api/test/GetDeal?DealID=65358",
-//  url: "http://xm2.cloudapp.net:8082/api/SocialGraph/GetDealForSocialGraph?DealID=65358",
-//  data: { userid: 6}
-//})
-//  .done(function( msg ) {
-//    alert( "Data got  " + msg );
-//  })
-//  .fail(function( msg ) {
-//      var xmdata = {"name":"DECO 2005-E1X","amount":7184006.26,"children":[{"name":"A1","amount":0.00},{"name":"A2","amount":0.00},{"name":"X","amount":50685.00},{"name":"B","amount":0.00},{"name":"C","amount":0.00},{"name":"D","amount":0.00},{"name":"E","amount":0.00},{"name":"F","amount":0.00},{"name":"G","amount":2235685.00},{"name":"H","amount":4897636.26}]};
-//      console.log(xmdata);
-//    alert( "Data failed " + msg );
-//    
-//    // update 
-//  });
-  
+ 
 </script>
 </body>
 </html>
