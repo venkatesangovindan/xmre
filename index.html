@@ -7,13 +7,16 @@
     <script src="js/util.js"></script>
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <style>
-      
+       
+        #social_graph svg {
+            margin-top: -5px;
+        }
 
     </style>
 </head>
 <body>
     <div id="container">
-        <div id="social_graph"></div>
+        <div id="social_graph" style=""></div>
     </div>
 
 <script>
@@ -255,6 +258,7 @@ $( document ).ready(function() {
     
     var zoom = d3.behavior.zoom()
         .scaleExtent([1, 10])
+      //  
         .on("zoom", zoomed);
 
     var svg = d3.select("#social_graph").append("svg")
@@ -264,7 +268,9 @@ $( document ).ready(function() {
         .attr("viewBox", "0 0 " + width + " " + height )
         .attr("overflow", "hidden")
         .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
-        .call(zoom);
+        .attr("class", "svg_cont")       
+        .call(zoom)
+        .on("dblclick.zoom", null);
 
     var rect = svg.append("rect")
         .attr("width", width)
@@ -361,16 +367,16 @@ $( document ).ready(function() {
     // Draw straight lines between loans and properties    
     var loansToPropertiesLine = container.append("g:line")
         .attr("x1", propertiesObj.propertiesStart + propertiesObj.prootr)
-        .attr("y1", 205)
+        .attr("y1", 225)
         .attr("x2", loansObj.loansStart - loansObj.lrootr)
-        .attr("y2", 205)
+        .attr("y2", 225)
         .attr("class", "loansToProperties"); 
     // Draw straight lines between deals and loans
     var dealsToLoansLine = container.append("g:line")
         .attr("x1", loansObj.loansStart + loansObj.lrootr)
-        .attr("y1", 205)
+        .attr("y1", 225)
         .attr("x2", dealsObj.dealsStart - dealsObj.drootr)
-        .attr("y2", 205)
+        .attr("y2", 225)
         .attr("class", "dealsToLoans");
     
     
@@ -387,7 +393,7 @@ $( document ).ready(function() {
         });
 
     var dealsGroup = container.append("g")
-                              .attr("transform", "translate("+ dealsObj.dealsStart + ",-20)");  
+                              .attr("transform", "translate("+ dealsObj.dealsStart + ",0)");  
 
     function dealsClick(d) {
         if (d3.event.defaultPrevented) return; // click suppressed
@@ -598,7 +604,7 @@ $( document ).ready(function() {
             .projection(function(d) { return [d.x, d.y]; });
     
     var loansGroup = container.append("g")
-                              .attr("transform", "translate("+ loansObj.loansStart +",205)");     
+                              .attr("transform", "translate("+ loansObj.loansStart +",225)");     
     
     function renderLoan(){
         if(loanData && loanData!=''){
@@ -809,7 +815,7 @@ $( document ).ready(function() {
         .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
 
     var propertiesGroup = container.append("g")
-        .attr("transform", "translate("+ propertiesObj.propertiesStart +",205)");
+        .attr("transform", "translate("+ propertiesObj.propertiesStart +",225)");
 
     
     function renderProperties(){
