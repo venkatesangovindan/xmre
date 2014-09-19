@@ -7,16 +7,12 @@
     <script src="js/util.js"></script>
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <style>
-       
-        #social_graph svg {
-            margin-top: -5px;
-        }
 
     </style>
 </head>
 <body>
     <div id="container">
-        <div id="social_graph" style=""></div>
+        <div id="social_graph"></div>
     </div>
 
 <script>
@@ -475,31 +471,6 @@ $( document ).ready(function() {
                 .attr("x", "0")
                 .attr("dy", "15");
 
-//        // Update the text to reflect whether node has children or not.
-//        node.select('text')
-//            .attr("x", function(d) {
-//                return d.children || d._children ? 0 : 0;
-//            })
-//            .attr("text-anchor", function(d) {
-//                return d.children || d._children ? "middle" : "middle";
-//            })
-
-        // Change the circle fill depending on whether it has children and is collapsed
-//        node.select("circle")
-//            .attr("r",   function(d) {
-//                var rval = 30;
-//                switch(d.depth){
-//                    case 0:
-//                        rval = dealsObj.drootr;
-//                        break;
-//                    default:                        
-//                        rval = dealsObj.dlevel1r;
-//                }
-//                return rval;
-//            })
-//            .attr("class", function(d) {
-//                            return d.sel ? d.colorSelected : d.colorDefault; 
-//            });
 
         // Transition nodes to their new position.
         var nodeUpdate = node.transition()
@@ -522,7 +493,7 @@ $( document ).ready(function() {
             })
             .attr("class", function(d) {
                             return d.sel ? d.colorSelected : d.colorDefault; 
-            });            
+            });
 
         // Fade the text in
         nodeUpdate.select("text")

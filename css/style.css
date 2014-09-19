@@ -138,3 +138,7 @@ path.link {
 .lwhite{
     fill: #fff;
 }
+
+#social_graph svg {
+    margin-top: -5px;
+}
