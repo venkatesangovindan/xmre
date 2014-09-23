@@ -142,3 +142,8 @@ path.link {
 #social_graph svg {
     margin-top: -5px;
 }
+
+div.social-graph-tooltip {position: absolute;width: 100px;height: auto;text-align: center;padding: 5px;background-color: #fff; color:#000;
+                           border: 1px solid #c2c2c2; pointer-events: none;-webkit-border-radius: 10px;-moz-border-radius: 10px;border-radius: 2px;
+                           -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);-mox-box-shadow: 4px 4px 4px 10px rgba(0, 0, 0, 0.4);box-shadow: 4px 4px 10px rbga(0, 0, 0, 0.4);
+                           pointer-events: none;font-size:11px;}

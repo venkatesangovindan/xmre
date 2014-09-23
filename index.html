@@ -54,7 +54,7 @@ $( document ).ready(function() {
     var container = svg.append("g");
 
     var tooltip = d3.select("body").append("div")   
-        .attr("class", "tooltip")               
+        .attr("class", "social-graph-tooltip")               
         .style("opacity", 0);
    
     /********************************************
@@ -207,6 +207,8 @@ $( document ).ready(function() {
     var dealId = Util.getUrlParamByName('did');
     var loanId = Util.getUrlParamByName('lid');
     var propertyId = Util.getUrlParamByName('pid');
+    
+    //var dealId = '@ViewBag.DealID';
     
     /*************************
      * Get the id
