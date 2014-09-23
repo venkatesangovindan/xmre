@@ -203,12 +203,37 @@ $( document ).ready(function() {
     
     var selectedloan='';
     var relatedDealId='';
+    var dealId = '';
+    var loanId = '';
+    var propertyId = '';
+    var entityType = '';
     
-    var dealId = Util.getUrlParamByName('did');
-    var loanId = Util.getUrlParamByName('lid');
-    var propertyId = Util.getUrlParamByName('pid');
     
-    //var dealId = '@ViewBag.DealID';
+    function getDealIdFromHash(urlhash){
+        var hashsplit = urlhash.split("?");
+        var hashsplitarr = hashsplit[0].split("/");
+        
+        if(hashsplitarr[2]){ // always 3 param is deal id in the url
+            return hashsplitarr[2];
+        }else{
+            return '';
+        }
+    }
+    // get the entity
+    entityType = Util.getEntityByUrl('type');
+  
+    switch(entityType){
+        case 'Deal':
+            dealId = getDealIdFromHash(window.location.hash); 
+            break;
+        case 'Loan':
+            loanId = Util.getEntityByUrl('loanId');
+            break;              
+        case 'Property':
+            propertyId = Util.getEntityByUrl('propertyId');
+            break;
+      
+    }
     
     /*************************
      * Get the id
@@ -220,7 +245,6 @@ $( document ).ready(function() {
 
     }else if(loanId && loanId!=''){
         // deal id is empty and loan id is present --first render loan then deal
-        // 65648
         var entity = 'loan';
         getDataAndRenderLoanAndCallOthers(entity, loanId, true, true); // render proprty true, render deal true
         

@@ -52,7 +52,17 @@ Util.getUrlParamByName = function(name){
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
     var results = regex.exec(location.search);
+    console.log(results);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));    
     
 };
+
+Util.getEntityByUrl = function(type){
+    
+    type = type.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + type + "=([^&#]*)");
+    var results = regex.exec(window.location.hash);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));      
+}
+
 
