@@ -17,232 +17,10 @@
 
 <script>
 $( document ).ready(function() {
-    // 65647
-    var dealData = {};
-    var loanData = {};
-    var propertiesData = {};
     
-    var selectedloan='';
-    
-    var dealId = Util.getUrlParamByName('did');
-    var loanId = Util.getUrlParamByName('lid');
-    var propertyId = Util.getUrlParamByName('pid');
-    
-    if(!dealId || dealId==''){
-        dealId = 65358;
-    }
-   console.log('did '+ dealId);
-    
-    /*************************
-     * Get the data through ajax call.
-     *************************/
-    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=deal&id="+dealId, function(error, serverData) {
-        if(serverData && serverData!==''){
-            dealData = serverData[0];
-            // adjust the data
-            dealData.currencySymbol = "&pound;";
-            dealData.colorDefault = "dealsDefault";
-            dealData.colorSelected = "dealsSelected";
-            dealData.sel = true;
-            
-            if(dealData.children.length > 6){ // only show 6 tranches now - it can be change
-                dealData.children = dealData.children.slice(0, 6);
-            }
-            
-            $.each( dealData.children, function( key, childObj ) {
-                childObj.currencySymbol = "&pound;";
-                childObj.colorDefault = "tranchesDefault";
-                childObj.colorSelected = "tranchesSelected";
-                childObj.sel = false;
-            });
-        }else{
-            // if deal data is empty then render just simple circle
-            dealData.currencySymbol = "&pound;";
-            dealData.colorDefault = "dwhite";
-            dealData.colorSelected = "dwhite";            
-            dealData.sel = true;
-            dealData.name ="No Deal";
-            dealData.amount = "";
-        }
-     
-       renderDeal();
-    });
-
-	
-    d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=loandeal&id="+dealId, function(error, serverData) {
-        
-        if(serverData && serverData!=='' && !$.isEmptyObject(serverData)){
-            // adjust the data
-            loanData.currencySymbol = "";
-            loanData.colorDefault = "loansDefault";
-            loanData.colorSelected = "loansSelected";
-            loanData.sel = true;
-            loanData.name = "loans";
-            loanData.amount = "";
-            loanData.children = serverData;
-
-            if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
-                loanData.children = loanData.children.slice(0, 8);
-            }
-
-            if(loanData.children && loanData.children.length >= 1){
-                loanData.count = loanData.children.length;                
-                $.each( loanData.children, function( key, childObj ) {
-                    childObj.currencySymbol = "&pound;";
-                    childObj.colorDefault = "b-loansDefault";
-                    childObj.colorSelected = "b-loansSelected";
-                    childObj.sel = false;
-                    // check sub loans
-                    /*if(childObj.children){
-                     //   childObj.children = subloans(childObj.children);
-                    }*/
-                });
-                selectedloan = loanData.children[0].id;
-                loanData.children[0].sel = true;
-            }            
-
-        }else{
-            loanData.currencySymbol = "";
-            loanData.colorDefault = "lwhite";
-            loanData.colorSelected = "lwhite";
-            loanData.sel = true;
-            loanData.name = "No Loans";
-            loanData.amount = "";
-
-        }
-        // show property
-        if(selectedloan && selectedloan!==''){
-            getPropertyAndRender(selectedloan);
-            //getPropertyAndRender(66221);
-        }else{
-            getPropertyAndRender();
-        }        
-     
-        renderLoan();
-    });
-	
-
-        
-    
-    function subloans(obj){
-        $.each( obj, function( key, cObj ) {
-            cObj.currencySymbol = "&pound;";
-            cObj.colorDefault = "b-loansDefault";
-            cObj.colorSelected = "b-loansSelected";
-            cObj.sel = false;
-            if(cObj.children){
-                cObj.children = subloans(cObj.children);
-            }
-        });
-        
-        return obj;
-    }
-    
-    function getPropertyAndRender(sloanid){
-       
-        if(sloanid!='' && $.isNumeric(sloanid)){
-            // get the data
-            d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType=propertyloan&id="+sloanid, function(error, serverData) {
-                
-                if(serverData && serverData!=='' && !$.isEmptyObject(serverData)){
-                    // adjust the data
-                    propertiesData.currencySymbol = "&pound;";
-                    propertiesData.colorDefault = "propertiesDefault";
-                    propertiesData.colorSelected = "propertiesSelected";
-                    propertiesData.name = "Properties";
-                    propertiesData.amount = "";
-                    propertiesData.sel = true;
-                    
-                    propertiesData.children = serverData;
-                    
-                    if(propertiesData.children && propertiesData.children.length >6){ // only show 6 tranches now - it can be change
-                        propertiesData.children = propertiesData.children.slice(0, 6);
-                    }
-                
-                    if(propertiesData.children && propertiesData.children.length >= 1){
-                        propertiesData.count = propertiesData.children.length;
-                        
-                        $.each( propertiesData.children, function( key, childObj ) {
-                            childObj.currencySymbol = "&pound;";
-                            childObj.colorDefault = "properties-singleDefault";
-                            childObj.colorSelected = "properties-singleSelected";
-                            childObj.sel = false;
-
-                            // check sub loans
-    //                        if(childObj.children){
-    //                            childObj.children = subloans(childObj.children);
-    //                        }
-                        });
-                    }
-                   
-                }else{
-                    if(propertiesData.children){
-                        propertiesData.children = '';
-                    }
-                    propertiesData.currencySymbol = "&pound;";
-                    propertiesData.colorDefault = "lwhite";
-                    propertiesData.colorSelected = "lwhite";
-
-                    propertiesData.name = "No Properties";
-                    propertiesData.amount = "";                
-                }
-                renderProperties();
-            });                  
-            
-        }else{
-            if(propertiesData.children){
-                        propertiesData.children = '';
-                    }
-            propertiesData.currencySymbol = "&pound;";
-            propertiesData.colorDefault = "lwhite";
-            propertiesData.colorSelected = "lwhite";
-
-            propertiesData.name = "No Properties";
-            propertiesData.amount = "";   
-            
-            renderProperties();
-        }
-
-    }
-	
-    
-        
-    /*********************************
-     * Common functions and variables - Helper functions for collapsing and expanding nodes.
-     *********************************/
-
-    function collapse(d) {
-        if (d.children) {
-            d._children = d.children;
-            d._children.forEach(collapse);
-            d.children = null;
-        }
-    }
-
-    function expand(d) {
-        if (d._children) {
-            d.children = d._children;
-            d.children.forEach(expand);
-            d._children = null;
-        }
-    }   
-    // Toggle children function
-    function toggleChildren(d, rootToggle) {
-        
-        // rootToggle is false always show root node with one level
-        if(!rootToggle && !d.parent){
-            return d;            
-        }        
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-        } else if (d._children) {
-            d.children = d._children;
-            d._children = null;
-        }
-        return d;
-    }
-    
+    /********************************************
+     * SVG and containers
+     ********************************************/    
     var windowwidth = $( window ).width(); // window width
     var sgraphHeight = 450;    
     
@@ -254,7 +32,6 @@ $( document ).ready(function() {
     
     var zoom = d3.behavior.zoom()
         .scaleExtent([1, 10])
-      //  
         .on("zoom", zoomed);
 
     var svg = d3.select("#social_graph").append("svg")
@@ -282,8 +59,8 @@ $( document ).ready(function() {
    
     /********************************************
      * All the graph methods and configs
-     ********************************************/
-    // deals
+     ********************************************/    
+           // deals
     function deals(){}    
     // initial configs
     // deals graph start position
@@ -360,6 +137,11 @@ $( document ).ready(function() {
         propertiesObj.plevel2r = 20;
         propertiesObj.pnodedepth = 70;
     }    
+    
+    /********************************************
+     * Draw the lines between loan to deal and loan to property
+     ********************************************/
+
     // Draw straight lines between loans and properties    
     var loansToPropertiesLine = container.append("g:line")
         .attr("x1", propertiesObj.propertiesStart + propertiesObj.prootr)
@@ -374,11 +156,12 @@ $( document ).ready(function() {
         .attr("x2", dealsObj.dealsStart - dealsObj.drootr)
         .attr("y2", 225)
         .attr("class", "dealsToLoans");
-    
-    
+
+
     /**********************************************
-     * Deals D3 js
-     **********************************************/                 
+     * Deals D3 js svg containers
+     **********************************************/   
+             
     var dtree = d3.layout.tree()
        .size([dealsObj.dviewerHeight, dealsObj.dviewerWidth]);
 
@@ -389,7 +172,336 @@ $( document ).ready(function() {
         });
 
     var dealsGroup = container.append("g")
-                              .attr("transform", "translate("+ dealsObj.dealsStart + ",0)");  
+                              .attr("transform", "translate("+ dealsObj.dealsStart + ",0)"); 
+                      
+    /**********************************************
+     * Loans D3 js svg containers
+     **********************************************/   
+    var ltree = d3.layout.tree()
+        .nodeSize([loansObj.lnodesizex, loansObj.lnodesizey]);
+
+    var ldiagonal = d3.svg.diagonal()
+            .projection(function(d) { return [d.x, d.y]; });
+    
+    var loansGroup = container.append("g")
+                              .attr("transform", "translate("+ loansObj.loansStart +",225)"); 
+    /**********************************************
+     * Properties D3 js svg containers
+     **********************************************/                        
+    var pdiagonal = d3.svg.diagonal.radial()
+        .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
+
+    var propertiesGroup = container.append("g")
+        .attr("transform", "translate("+ propertiesObj.propertiesStart +",225)"); 
+
+    /********************************************
+     * All the data and backend values
+     ********************************************/  
+    var dealData = {};
+    var loanData = {};
+    var propertiesData = {};
+    
+    var selectedloan='';
+    var relatedDealId='';
+    
+    var dealId = Util.getUrlParamByName('did');
+    var loanId = Util.getUrlParamByName('lid');
+    var propertyId = Util.getUrlParamByName('pid');
+    
+    /*************************
+     * Get the id
+     *************************/
+    if(dealId && dealId!=''){
+        // got deal id
+         getDataAndRenderDeal('deal', dealId);
+         getDataAndRenderLoanAndCallOthers('loandeal', dealId, true, false); // render proprty true, render deal false
+
+    }else if(loanId && loanId!=''){
+        // deal id is empty and loan id is present --first render loan then deal
+        // 65648
+        var entity = 'loan';
+        getDataAndRenderLoanAndCallOthers(entity, loanId, true, true); // render proprty true, render deal true
+        
+    }else if(propertyId && propertyId!=''){
+        getPropertyAndRender('property', propertyId, true, true);
+        
+    }else{
+        renderEmptyDeal();
+        renderEmptyLoan();
+        renderEmptyProperty();
+    }
+    
+    function renderEmptyDeal(){
+                // just render simple circle
+        dealData.currencySymbol = "&pound;";
+        dealData.colorDefault = "dwhite";
+        dealData.colorSelected = "dwhite";            
+        dealData.sel = true;
+        dealData.name ="No Deal";
+        dealData.amount = "";
+
+        renderDeal();
+    }
+    
+    function renderEmptyLoan(){
+        //loan
+        loanData.currencySymbol = "";
+        loanData.colorDefault = "lwhite";
+        loanData.colorSelected = "lwhite";
+        loanData.sel = true;
+        loanData.name = "No Loans";
+        loanData.amount = "";        
+        renderLoan();        
+    }
+    
+    function renderEmptyProperty(){
+        if(propertiesData.children){
+            propertiesData.children = '';
+        }
+        propertiesData.currencySymbol = "&pound;";
+        propertiesData.colorDefault = "lwhite";
+        propertiesData.colorSelected = "lwhite";
+        propertiesData.name = "No Properties";
+        propertiesData.amount = "";   
+
+        renderProperties();     
+    }    
+    
+    function getDataAndRenderLoanAndCallOthers(entity, id, prender, drender){
+        // first render loan then deal
+        d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType="+entity+"&id="+id, function(error, serverData) {
+
+            if(serverData == "" || serverData == null || $.isEmptyObject(serverData)){
+                renderEmptyLoan();
+                
+                if(prender){
+                    renderEmptyProperty();
+                }
+                if(drender){
+                    renderEmptyDeal();
+                }
+               
+            }else{
+                loanData.currencySymbol = "";
+                loanData.colorDefault = "loansDefault";
+                loanData.colorSelected = "loansSelected";
+                loanData.sel = true;
+                loanData.name = "loans";
+                loanData.amount = "";
+                loanData.children = serverData;
+
+                if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
+                    loanData.children = loanData.children.slice(0, 8);
+                }
+                if(loanData.children && loanData.children.length >= 1){
+                    loanData.count = loanData.children.length;                
+                    $.each( loanData.children, function( key, childObj ) {
+                        childObj.currencySymbol = "&pound;";
+                        childObj.colorDefault = "b-loansDefault";
+                        childObj.colorSelected = "b-loansSelected";
+                        childObj.sel = false;
+                       
+                        // check sub loans
+                        /*if(childObj.children){
+                         //   childObj.children = subloans(childObj.children);
+                        }*/
+                    });
+                    selectedloan = loanData.children[0].id;
+                    loanData.children[0].sel = true;
+                    if(drender){
+                        relatedDealId = loanData.children[0].parentId;                        
+                    }
+                }
+                
+                // show property
+                if(prender){
+                    if(selectedloan && selectedloan!==''){
+                        getPropertyAndRender('propertyloan', selectedloan, false, false);
+                        //getPropertyAndRender(66221);
+                    }else{
+                        getPropertyAndRender('', '', false, false);
+                    } 
+                }
+                // show deals
+                if(drender){
+                    if(relatedDealId && relatedDealId!==''){
+                        getDataAndRenderDeal('deal', relatedDealId);
+
+                    }else{
+                       renderEmptyDeal();
+                    } 
+                }                  
+                renderLoan();
+            }
+        }); 
+    }
+    
+    function getDataAndRenderDeal(entity, id){
+        d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType="+entity+"&id="+id, function(error, serverData) {
+            if(serverData && serverData!==''){
+                dealData = serverData[0];
+                // adjust the data
+                dealData.currencySymbol = "&pound;";
+                dealData.colorDefault = "dealsDefault";
+                dealData.colorSelected = "dealsSelected";
+                dealData.sel = true;
+
+                if(dealData.children.length > 6){ // only show 6 tranches now - it can be change
+                    dealData.children = dealData.children.slice(0, 6);
+                }
+
+                $.each( dealData.children, function( key, childObj ) {
+                    childObj.currencySymbol = "&pound;";
+                    childObj.colorDefault = "tranchesDefault";
+                    childObj.colorSelected = "tranchesSelected";
+                    childObj.sel = false;
+                });
+            }else{
+                // if deal data is empty then render just simple circle
+                dealData.currencySymbol = "&pound;";
+                dealData.colorDefault = "dwhite";
+                dealData.colorSelected = "dwhite";            
+                dealData.sel = true;
+                dealData.name ="No Deal";
+                dealData.amount = "";
+            }
+
+           renderDeal();
+        });
+    }
+    
+    function subloans(obj){
+        $.each( obj, function( key, cObj ) {
+            cObj.currencySymbol = "&pound;";
+            cObj.colorDefault = "b-loansDefault";
+            cObj.colorSelected = "b-loansSelected";
+            cObj.sel = false;
+            if(cObj.children){
+                cObj.children = subloans(cObj.children);
+            }
+        });
+        
+        return obj;
+    }
+    
+    function getPropertyAndRender(entity, sloanid, lrender, drender){
+        if(sloanid!='' && $.isNumeric(sloanid)){
+            // get the data
+            d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType="+entity+"&id="+sloanid, function(error, serverData) {
+                
+                if(serverData == "" || serverData == null || $.isEmptyObject(serverData)){
+                    renderEmptyProperty();
+                        
+                    if(lrender){
+                       renderEmptyLoan();
+                    }
+                    if(drender){
+                        renderEmptyDeal();
+                    }
+
+                }else{
+                    // adjust the data
+                    propertiesData.currencySymbol = "&pound;";
+                    propertiesData.colorDefault = "propertiesDefault";
+                    propertiesData.colorSelected = "propertiesSelected";
+                    propertiesData.name = "Properties";
+                    propertiesData.amount = "";
+                    propertiesData.sel = true;
+                    
+                    propertiesData.children = serverData;
+                    
+                    if(propertiesData.children && propertiesData.children.length >6){ // only show 6 tranches now - it can be change
+                        propertiesData.children = propertiesData.children.slice(0, 6);
+                    }
+                
+                    if(propertiesData.children && propertiesData.children.length >= 1){
+                        propertiesData.count = propertiesData.children.length;
+                        
+                        $.each( propertiesData.children, function( key, childObj ) {
+                            childObj.currencySymbol = "&pound;";
+                            childObj.colorDefault = "properties-singleDefault";
+                            childObj.colorSelected = "properties-singleSelected";
+                            childObj.sel = false;
+
+                            // check sub loans
+    //                        if(childObj.children){
+    //                            childObj.children = subloans(childObj.children);
+    //                        }
+                        });
+                        
+                        // show loans
+                        if(lrender){
+                            relatedLoanId = propertiesData.children[0].parentId;
+                            if(relatedLoanId && relatedLoanId!==''){
+                                getDataAndRenderLoanAndCallOthers('loan', relatedLoanId, false, drender);
+                            }else{
+                                renderEmptyLoan();
+                                if(drender){
+                                   renderEmptyDeal(); 
+                                }
+                            } 
+                        }
+                    }
+                    
+                    renderProperties();                    
+                }
+            });                  
+            
+        }else{
+            if(propertiesData.children){
+                        propertiesData.children = '';
+                    }
+            propertiesData.currencySymbol = "&pound;";
+            propertiesData.colorDefault = "lwhite";
+            propertiesData.colorSelected = "lwhite";
+
+            propertiesData.name = "No Properties";
+            propertiesData.amount = "";   
+            
+            renderProperties();
+        }
+
+    }
+	
+    /*********************************
+     * Common functions and variables - Helper functions for collapsing and expanding nodes.
+     *********************************/
+
+    function collapse(d) {
+        if (d.children) {
+            d._children = d.children;
+            d._children.forEach(collapse);
+            d.children = null;
+        }
+    }
+
+    function expand(d) {
+        if (d._children) {
+            d.children = d._children;
+            d.children.forEach(expand);
+            d._children = null;
+        }
+    }   
+    // Toggle children function
+    function toggleChildren(d, rootToggle) {
+        
+        // rootToggle is false always show root node with one level
+        if(!rootToggle && !d.parent){
+            return d;            
+        }        
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else if (d._children) {
+            d.children = d._children;
+            d._children = null;
+        }
+        return d;
+    }
+    
+    /**********************************************
+     * Deals D3 js 
+     **********************************************/   
 
     function dealsClick(d) {
         if (d3.event.defaultPrevented) return; // click suppressed
@@ -578,21 +690,11 @@ $( document ).ready(function() {
         }
     }
 
-
-
     // deals over
     /**********************************************
      * Loans D3 js
      **********************************************/
-    var ltree = d3.layout.tree()
-        .nodeSize([loansObj.lnodesizex, loansObj.lnodesizey]);
-
-    var ldiagonal = d3.svg.diagonal()
-            .projection(function(d) { return [d.x, d.y]; });
-    
-    var loansGroup = container.append("g")
-                              .attr("transform", "translate("+ loansObj.loansStart +",225)");     
-    
+   
     function renderLoan(){
         if(loanData && loanData!=''){
             loansObj.data = loanData;
@@ -771,7 +873,8 @@ $( document ).ready(function() {
                 loadid = d.id - 1;
             }
             
-            getPropertyAndRender(loadid);
+           // getPropertyAndRender(loadid);
+            getPropertyAndRender('propertyloan', loadid, false, false);
         }
         
     } 
@@ -798,13 +901,6 @@ $( document ).ready(function() {
 
     }
 
-    var pdiagonal = d3.svg.diagonal.radial()
-        .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; }); 
-
-    var propertiesGroup = container.append("g")
-        .attr("transform", "translate("+ propertiesObj.propertiesStart +",225)");
-
-    
     function renderProperties(){
         if(propertiesData && propertiesData!=''){
             propertiesObj.data = propertiesData;
@@ -995,14 +1091,10 @@ function zoomed() {
 }
 
 $(window).resize(function(){
-    location.reload();
+   // location.reload();
 
 });
  // document ready end  
-
-
-
-
 
 });
  
