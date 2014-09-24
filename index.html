@@ -98,6 +98,7 @@ $( document ).ready(function() {
     
     loans.prototype.li = 0;    
     loans.prototype.maxDisplayChar = 10;
+    loans.prototype.maxDisplayCharl1 = 10;
     loans.prototype.lroot = '';    
     loans.prototype.lheight = 430;      
   
@@ -124,7 +125,8 @@ $( document ).ready(function() {
     properties.prototype.pheight = 800; 
     
     properties.prototype.pi = 0;    
-    properties.prototype.maxDisplayChar = 10;
+    properties.prototype.maxDisplayChar = 15;
+    properties.prototype.maxDisplayCharl1 = 10;
     properties.prototype.proot = ''; 
     
     properties.prototype.ptreeAngle = 360; 
@@ -235,27 +237,7 @@ $( document ).ready(function() {
       
     }
     
-    /*************************
-     * Get the id
-     *************************/
-    if(dealId && dealId!=''){
-        // got deal id
-         getDataAndRenderDeal('deal', dealId);
-         getDataAndRenderLoanAndCallOthers('loandeal', dealId, true, false); // render proprty true, render deal false
 
-    }else if(loanId && loanId!=''){
-        // deal id is empty and loan id is present --first render loan then deal
-        var entity = 'loan';
-        getDataAndRenderLoanAndCallOthers(entity, loanId, true, true); // render proprty true, render deal true
-        
-    }else if(propertyId && propertyId!=''){
-        getPropertyAndRender('property', propertyId, true, true);
-        
-    }else{
-        renderEmptyDeal();
-        renderEmptyLoan();
-        renderEmptyProperty();
-    }
     
     function renderEmptyDeal(){
                 // just render simple circle
@@ -263,7 +245,7 @@ $( document ).ready(function() {
         dealData.colorDefault = "dwhite";
         dealData.colorSelected = "dwhite";            
         dealData.sel = true;
-        dealData.name ="No Deal";
+        dealData.name ="Deal (0)";
         dealData.amount = "";
 
         renderDeal();
@@ -275,7 +257,7 @@ $( document ).ready(function() {
         loanData.colorDefault = "lwhite";
         loanData.colorSelected = "lwhite";
         loanData.sel = true;
-        loanData.name = "No Loans";
+        loanData.name = "Loans (0)";
         loanData.amount = "";        
         renderLoan();        
     }
@@ -287,7 +269,7 @@ $( document ).ready(function() {
         propertiesData.currencySymbol = "&pound;";
         propertiesData.colorDefault = "lwhite";
         propertiesData.colorSelected = "lwhite";
-        propertiesData.name = "No Properties";
+        propertiesData.name = "Properties (0)";
         propertiesData.amount = "";   
 
         renderProperties();     
@@ -315,6 +297,10 @@ $( document ).ready(function() {
                 loanData.name = "loans";
                 loanData.amount = "";
                 loanData.children = serverData;
+                
+                if(loanData.children){
+                    loanData.name = "loans ("+loanData.children.length+")";
+                }
 
                 if(loanData.children && loanData.children.length > 8){ // only show 6 tranches now - it can be change
                     loanData.children = loanData.children.slice(0, 8);
@@ -371,7 +357,7 @@ $( document ).ready(function() {
                 dealData.colorDefault = "dealsDefault";
                 dealData.colorSelected = "dealsSelected";
                 dealData.sel = true;
-
+                
                 if(dealData.children.length > 6){ // only show 6 tranches now - it can be change
                     dealData.children = dealData.children.slice(0, 6);
                 }
@@ -414,7 +400,7 @@ $( document ).ready(function() {
         if(sloanid!='' && $.isNumeric(sloanid)){
             // get the data
             d3.json("http://xm2.cloudapp.net:8082/api/SocialGraph/GetData?entityType="+entity+"&id="+sloanid, function(error, serverData) {
-                
+               
                 if(serverData == "" || serverData == null || $.isEmptyObject(serverData)){
                     renderEmptyProperty();
                         
@@ -424,7 +410,6 @@ $( document ).ready(function() {
                     if(drender){
                         renderEmptyDeal();
                     }
-
                 }else{
                     // adjust the data
                     propertiesData.currencySymbol = "&pound;";
@@ -435,7 +420,9 @@ $( document ).ready(function() {
                     propertiesData.sel = true;
                     
                     propertiesData.children = serverData;
-                    
+                    if(propertiesData.children){
+                        propertiesData.name = "Properties ("+propertiesData.children.length+")";
+                    }                    
                     if(propertiesData.children && propertiesData.children.length >6){ // only show 6 tranches now - it can be change
                         propertiesData.children = propertiesData.children.slice(0, 6);
                     }
@@ -785,7 +772,11 @@ $( document ).ready(function() {
          var tspan1 = textspan.append('tspan');
          var tspan2 = textspan.append('tspan');
          tspan1.text(function(d) { 
-             var na = Util.getLimitedChar(d.name, 10);
+             var dischar = loansObj.maxDisplayCharl1;
+             if(d.depth==0){
+                 dischar = loansObj.maxDisplayChar;
+             }
+             var na = Util.getLimitedChar(d.name, dischar);
 //             if(d.count !='' && d.count !='n'){
 //                 var na = na + '('+ d.count + ') ';
 //             }
@@ -896,9 +887,9 @@ $( document ).ready(function() {
             
             var loadid = 0;
             if(d.id > 0){
-                loadid = d.id - 1;
+                loadid = d.id;
             }
-            
+
            // getPropertyAndRender(loadid);
             getPropertyAndRender('propertyloan', loadid, false, false);
         }
@@ -1000,7 +991,11 @@ $( document ).ready(function() {
             .attr("text-anchor", "middle")
             .attr("transform", function(d) { return d.x < 180 ? "translate(0)" : "translate(-" + (d.name.length * 8.5)  + ")"; })
             .text(function(d) {
-                var nap = Util.getLimitedChar(d.name, 10); 
+             var dischar = propertiesObj.maxDisplayCharl1;
+             if(d.depth==0){
+                 dischar = propertiesObj.maxDisplayChar;
+             }                
+                var nap = Util.getLimitedChar(d.name, dischar); 
                // if(d.count!='' && d.count!='n'){nap = nap + '(' + d.count+')'};
                 return nap; })
             .style("fill-opacity", 1e-6);
@@ -1121,7 +1116,27 @@ $(window).resize(function(){
 
 });
  // document ready end  
+    /*************************
+     * Get the id
+     *************************/
+    if(dealId && dealId!='' && dealId!=0){
+        // got deal id
+         getDataAndRenderDeal('deal', dealId);
+         getDataAndRenderLoanAndCallOthers('loandeal', dealId, true, false); // render proprty true, render deal false
 
+    }else if(loanId && loanId!='' && loanId!=0){
+        // deal id is empty and loan id is present --first render loan then deal
+        var entity = 'loan';
+        getDataAndRenderLoanAndCallOthers(entity, loanId, true, true); // render proprty true, render deal true
+        
+    }else if(propertyId && propertyId!='' && propertyId!=0){
+        getPropertyAndRender('property', propertyId, true, true);
+        
+    }else{
+        renderEmptyDeal();
+        renderEmptyLoan();
+        renderEmptyProperty();
+    }
 });
  
 </script>
